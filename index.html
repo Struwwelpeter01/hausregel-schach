@@ -1,0 +1,1150 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2d4fd6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="description" content="Schach mit selbst erfundenen Regeln. Am Handy oder online mit Freunden.">
+<title>Hausregel-Schach</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%232d4fd6'/%3E%3Ctext x='50' y='76' font-size='72' text-anchor='middle' fill='white'%3E%E2%99%9E%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+Symbols+2&display=swap" rel="stylesheet">
+<style>
+html{padding-top:env(safe-area-inset-top,0px)}
+body{margin:0}
+[hidden]{display:none!important}
+
+/* Layout: one narrow column (max 640px), sticky top bar, board-first game view, card stack for variants and the rule workshop. */
+:root{
+  --bg:#e9edf2; --surface:#ffffff; --surface2:#f3f5f8; --ink:#141b24; --muted:#5a6676; --line:#cfd6df;
+  --accent:#2d4fd6; --accent-ink:#ffffff; --sq-light:#d3dce7; --sq-dark:#7489a6;
+  --hl:#f4c84a; --target:rgba(20,27,36,.32); --danger:#c8352b; --ok:#1f8a4c;
+  --pc-white:#fbfbf7; --pc-white-edge:#18202b; --pc-black:#161d27; --pc-black-edge:#e8edf3;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  --f-piece:"Noto Sans Symbols 2", "Segoe UI Symbol", "DejaVu Sans", sans-serif;
+  --r:12px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f141b; --surface:#171e28; --surface2:#1e2733; --ink:#e7ecf2; --muted:#93a0b1; --line:#2c3746;
+  --accent:#6f8bff; --accent-ink:#0b1020; --sq-light:#a9b8ca; --sq-dark:#56698a;
+  --hl:#e8b931; --target:rgba(10,14,20,.45); --danger:#ff6b5e; --ok:#46c17d; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0f141b; --surface:#171e28; --surface2:#1e2733; --ink:#e7ecf2; --muted:#93a0b1; --line:#2c3746;
+  --accent:#6f8bff; --accent-ink:#0b1020; --sq-light:#a9b8ca; --sq-dark:#56698a;
+  --hl:#e8b931; --target:rgba(10,14,20,.45); --danger:#ff6b5e; --ok:#46c17d; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--f-body);font-size:16px;line-height:1.45;padding-inline:16px;padding-block:0 96px}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);margin-inline:-16px;padding:10px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+.brand{font-family:var(--f-display);font-weight:800;font-size:20px;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;cursor:pointer;background:none;border:0;color:var(--ink);padding:0}
+.brand .k{font-family:var(--f-piece);font-size:24px;color:var(--accent);line-height:1}
+.top .sp{flex:1}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:28px;line-height:1.1;font-weight:800}
+h2{font-size:20px;font-weight:800}
+h3{font-size:16px;font-weight:600}
+p{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.lbl{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.btn{font:inherit;font-weight:700;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 15px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-height:40px}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent}
+.btn.sm{padding:5px 11px;min-height:32px;font-size:14px}
+.btn.danger{color:var(--danger)}
+.btn:focus-visible,input:focus-visible,select:focus-visible,.sq:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn[disabled]{opacity:.45;cursor:default}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:12.5px;padding:3px 9px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);color:var(--ink)}
+.chip.std{color:var(--muted)}
+input[type=text],input[type=number],select{font:inherit;color:var(--ink);background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:7px 9px;min-height:38px;max-width:100%}
+input[type=number]{width:62px;font-family:var(--f-mono)}
+input.wide{width:100%}
+label.tog{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+label.tog input{width:20px;height:20px;margin-top:2px;accent-color:var(--accent);flex:none}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--surface2)}
+.seg button{font:inherit;font-size:14px;font-weight:700;border:0;background:transparent;color:var(--muted);padding:7px 12px;cursor:pointer;min-height:36px}
+.seg button.on{background:var(--accent);color:var(--accent-ink)}
+.hero{display:flex;flex-direction:column;gap:8px;padding-top:10px}
+.hero .hand{font-family:var(--f-mono);font-size:13px;color:var(--accent)}
+
+/* Board */
+.boardbox{display:flex;flex-direction:column;gap:10px}
+.board{display:grid;width:100%;max-width:min(100%,560px);margin:0 auto;border-radius:6px;overflow:hidden;border:2px solid var(--ink);user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.sq{position:relative;aspect-ratio:1;display:flex;align-items:center;justify-content:center;cursor:pointer;min-width:0}
+.sq.l{background:var(--sq-light)} .sq.d{background:var(--sq-dark)}
+.sq.last::before{content:"";position:absolute;inset:0;background:var(--hl);opacity:.45}
+.sq.sel::before{content:"";position:absolute;inset:0;background:var(--hl);opacity:.8}
+.sq.chk::before{content:"";position:absolute;inset:0;background:radial-gradient(circle,var(--danger) 0,transparent 72%);opacity:.9}
+.sq.tg::after{content:"";position:absolute;width:30%;height:30%;border-radius:50%;background:var(--target)}
+.sq.tg.cp::after{width:86%;height:86%;background:transparent;border:4px solid var(--target);box-sizing:border-box}
+.sq.pick{cursor:pointer}
+.sq.pick .pc{animation:bob 1.2s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-6%)}}
+@media (prefers-reduced-motion:reduce){.sq.pick .pc{animation:none}}
+.coord{position:absolute;font-family:var(--f-mono);font-size:clamp(8px,2.2vw,11px);font-weight:600;line-height:1;pointer-events:none;z-index:2}
+.coord.f{right:3px;bottom:2px} .coord.r{left:3px;top:3px}
+.sq.l .coord{color:var(--sq-dark)} .sq.d .coord{color:var(--sq-light)}
+.pc{position:relative;z-index:1;font-family:var(--f-piece);line-height:1;font-size:var(--pcs,40px);pointer-events:none}
+.pc.w{color:var(--pc-white);-webkit-text-stroke:1.3px var(--pc-white-edge);paint-order:stroke fill;text-shadow:0 1px 0 rgba(0,0,0,.25)}
+.pc.b{color:var(--pc-black);-webkit-text-stroke:.6px var(--pc-black-edge);paint-order:stroke fill}
+.mk{position:absolute;z-index:2;left:4%;bottom:4%;font-family:var(--f-mono);font-size:clamp(8px,2.4vw,12px);font-weight:600;line-height:1;padding:2px 3px;border-radius:4px;background:var(--ink);color:var(--bg);pointer-events:none}
+.hid{position:absolute;z-index:2;right:4%;top:4%;font-family:var(--f-piece);font-size:clamp(9px,2.8vw,14px);line-height:1;padding:2px;border-radius:50%;background:var(--accent);color:var(--accent-ink);pointer-events:none}
+.status{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap}
+.turn{display:flex;align-items:center;gap:8px;font-family:var(--f-display);font-weight:800;font-size:19px}
+.dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--ink)}
+.dot.w{background:#fbfbf7} .dot.b{background:#161d27}
+.banner{border-radius:var(--r);padding:12px 14px;background:var(--surface2);border:1px solid var(--line);font-weight:700}
+.banner.win{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.banner.chk{border-color:var(--danger);color:var(--danger)}
+.hist{font-family:var(--f-mono);font-size:13.5px;display:grid;grid-template-columns:2.4em 1fr 1fr;gap:2px 10px;max-height:180px;overflow:auto;font-variant-numeric:tabular-nums}
+.hist .n{color:var(--muted)}
+.hist span{font-family:var(--f-mono)} .hist .g{font-family:var(--f-piece)}
+.rulelist{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.code{font-family:var(--f-mono);font-size:30px;font-weight:600;letter-spacing:.18em}
+
+/* Editor */
+.ptype{border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:10px;background:var(--surface2)}
+.ptype-head{display:grid;grid-template-columns:auto 1fr 64px;gap:8px;align-items:center}
+.glyphsel{font-family:var(--f-piece);font-size:24px;padding:2px 6px}
+.mv{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:8px;border-radius:8px;background:var(--surface);border:1px solid var(--line)}
+.mv .x{font-family:var(--f-mono);color:var(--muted)}
+.mini{display:grid;grid-template-columns:repeat(9,1fr);width:144px;border:1px solid var(--line);border-radius:4px;overflow:hidden;flex:none}
+.mini i{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;line-height:1}
+.mini i.l{background:var(--sq-light)} .mini i.d{background:var(--sq-dark)}
+.mini i.c{font-family:var(--f-piece);font-size:13px;color:var(--ink);background:var(--hl)}
+.mini i.both::after{content:"";width:55%;height:55%;border-radius:50%;background:var(--accent)}
+.mini i.move::after{content:"";width:45%;height:45%;border-radius:50%;border:2px solid var(--accent);box-sizing:border-box}
+.mini i.cap::after{content:"\00d7";color:var(--danger);font-weight:700;font-size:14px}
+.ptype-body{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start}
+.ptype-body .moves{flex:1 1 240px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.palette{display:flex;gap:6px;flex-wrap:wrap}
+.palette button{font-family:var(--f-piece);font-size:26px;width:46px;height:46px;border-radius:8px;border:1px solid var(--line);background:var(--surface2);cursor:pointer;position:relative;color:var(--ink)}
+.palette button.on{border:2px solid var(--accent);background:var(--surface)}
+.palette button .mk{font-size:10px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+
+/* Overlay */
+#overlay{position:fixed;inset:0;z-index:20;background:rgba(10,14,20,.6);display:flex;align-items:center;justify-content:center;padding:16px}
+#overlay[hidden]{display:none!important}
+.sheet{background:var(--surface);color:var(--ink);border-radius:16px;padding:20px;max-width:420px;width:100%;display:flex;flex-direction:column;gap:14px}
+.promo{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.promo button{font-family:var(--f-piece);font-size:40px;width:68px;height:68px;border-radius:12px;border:1px solid var(--line);background:var(--sq-light);cursor:pointer;position:relative}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:700;max-width:calc(100% - 32px);text-align:center}
+.hold{touch-action:none;user-select:none;-webkit-user-select:none}
+
+.hero .k.big{font-family:var(--f-piece);font-size:44px;color:var(--accent);line-height:1}
+.hero .hand{font-family:var(--f-mono);font-size:14px;color:var(--accent);margin:0}
+.menu{display:flex;flex-direction:column;gap:10px}
+.mbtn{font:inherit;color:var(--ink);text-align:left;display:flex;align-items:center;gap:14px;padding:16px;border-radius:14px;border:1px solid var(--line);background:var(--surface);cursor:pointer;position:relative;min-height:76px}
+.mbtn:hover{border-color:var(--accent)}
+.mbtn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.mbtn>span:nth-child(2){display:flex;flex-direction:column;gap:2px;min-width:0}
+.mbtn b{font-family:var(--f-display);font-size:19px;font-weight:800}
+.mi{font-family:var(--f-piece);font-size:34px;width:52px;height:52px;flex:none;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--sq-light);color:var(--pc-black)}
+.mbtn:nth-child(2) .mi{background:var(--sq-dark);color:var(--pc-white)}
+.badge{position:absolute;right:14px;top:50%;transform:translateY(-50%);min-width:26px;height:26px;border-radius:13px;background:var(--danger);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 7px;font-family:var(--f-mono);font-size:13px}
+.toggles{display:flex;flex-direction:column}
+.rt{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.rt:last-child{border-bottom:0}
+.rt-text{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.switch{appearance:none;-webkit-appearance:none;width:50px;height:30px;border-radius:15px;background:var(--line);position:relative;cursor:pointer;flex:none;transition:background .15s;margin:0}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .15s}
+.switch:checked{background:var(--accent)}
+.switch:checked::after{transform:translateX(20px)}
+.switch:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.switch,.switch::after{transition:none}}
+.pres{color:var(--muted)} .pres.on{color:var(--ok);font-weight:700}
+.invite{border-color:var(--accent);border-width:2px}
+.inv{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;padding:8px 0;border-top:1px solid var(--line)}
+.inv:first-of-type{border-top:0}
+.grow{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);padding:6px 0}
+.grow:first-of-type{border-top:0}
+.frbtn{font:inherit;font-weight:700;font-size:14px;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;min-height:36px;cursor:pointer}
+.frbtn .frico{font-family:var(--f-piece);font-size:18px;line-height:1}
+.frbtn .cnt:not(:empty){background:var(--ok);color:#fff;border-radius:10px;min-width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-size:12px;padding:0 6px}
+#drawerbg{position:fixed;inset:0;z-index:15;background:rgba(10,14,20,.45);opacity:0;pointer-events:none;transition:opacity .2s}
+#drawerbg.open{opacity:1;pointer-events:auto}
+#drawer{position:fixed;top:0;right:0;bottom:0;z-index:16;width:min(340px,86vw);background:var(--surface);border-left:1px solid var(--line);box-shadow:-8px 0 24px rgba(0,0,0,.18);transform:translateX(105%);transition:transform .22s ease;padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+#drawer.open{transform:none}
+@media (prefers-reduced-motion:reduce){#drawer,#drawerbg{transition:none}}
+.drhead{display:flex;align-items:center;justify-content:space-between}
+.frlist{display:flex;flex-direction:column}
+.fr{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.fr:last-child{border-bottom:0}
+.frdot{width:11px;height:11px;border-radius:50%;background:var(--line);flex:none}
+.fr.on .frdot{background:var(--ok);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 25%,transparent)}
+.frtxt{flex:1;min-width:0;display:flex;flex-direction:column}
+.frtxt b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pbar{display:flex;align-items:center;gap:8px;min-height:30px;font-size:15px;padding:0 2px}
+.pbar .dot{width:14px;height:14px}
+.pbar.turnon b{text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:3px;text-underline-offset:4px}
+.caps{flex:1;min-width:0;overflow:hidden;white-space:nowrap}
+.caps .pc{font-size:19px;letter-spacing:-3px}
+.adv{font-family:var(--f-mono);font-weight:600;font-size:14px;color:var(--ink);background:var(--surface2);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+.rbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;padding:6px;border-radius:10px}
+.rbar.on{background:var(--surface2);outline:2px solid var(--hl)}
+.rbar .arrow{min-width:52px;justify-content:center;font-size:16px}
+.rlabel{min-width:150px;text-align:center;font-variant-numeric:tabular-nums}
+.dicebar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.dice{display:flex;gap:8px}
+.die{width:52px;height:52px;border-radius:10px;background:var(--surface);border:2px solid var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;gap:2px}
+.die b{font-family:var(--f-mono);font-size:15px}
+.die .pc{font-size:24px}
+.die.used{opacity:.3;border-style:dashed}
+@media (prefers-reduced-motion:no-preference){.die.fresh{animation:roll .35s ease-out}}
+@keyframes roll{from{transform:rotate(-25deg) scale(.7)}to{transform:none}}
+.grow.hot .glink b::before{content:"● ";color:var(--danger)}
+.glink{flex:1;min-width:0;font:inherit;color:var(--ink);background:none;border:0;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:2px;padding:6px 0}
+</style>
+<script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
+<script>window.mqtt||document.write('<script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js"><\/script>')</script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <button class="brand" data-act="go" data-v="home" type="button"><span class="k">♚</span>Hausregel-Schach</button>
+    <span class="sp"></span>
+    <button class="frbtn" id="frbtn" data-act="drawer" type="button" aria-label="Freunde" hidden><span class="frico">♙</span><span>Freunde</span><span class="cnt" id="frcnt"></span></button>
+  </header>
+  <main id="view" class="wrap"></main>
+</div>
+<div id="drawerbg"></div>
+<aside id="drawer" aria-label="Freunde"></aside>
+<div id="overlay" hidden></div>
+<div id="toast" hidden></div>
+<script>
+
+/* ================= Data ================= */
+const GLYPHS=['♚','♛','♜','♝','♞','♟'];
+const FILES='abcdefghijklmnop';
+const BACK={4:'RQKR',5:'RNQKR',6:'RNQKBR',7:'RNBQKNR',8:'RNBQKBNR',9:'RNBQKBNNR',10:'RNNBQKBNNR',11:'RNNBQKQBNNR',12:'RRNNBQKBNNRR'};
+const clone=o=>JSON.parse(JSON.stringify(o));
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const other=c=>c==='w'?'b':'w';
+const cname=c=>c==='w'?'Weiß':'Schwarz';
+
+function stdTypes(){return {
+  K:{name:'König',glyph:'♚',mark:'',royal:true,moves:[{k:'leap',a:1,b:0,r:0,mode:'both'},{k:'leap',a:1,b:1,r:0,mode:'both'}]},
+  Q:{name:'Dame',glyph:'♛',mark:'',moves:[{k:'ride',a:1,b:0,r:0,mode:'both'},{k:'ride',a:1,b:1,r:0,mode:'both'}]},
+  R:{name:'Turm',glyph:'♜',mark:'',castle:true,moves:[{k:'ride',a:1,b:0,r:0,mode:'both'}]},
+  B:{name:'Läufer',glyph:'♝',mark:'',moves:[{k:'ride',a:1,b:1,r:0,mode:'both'}]},
+  N:{name:'Springer',glyph:'♞',mark:'',moves:[{k:'leap',a:1,b:2,r:0,mode:'both'}]},
+  P:{name:'Bauer',glyph:'♟',mark:'',pawn:true,moves:[]}
+};}
+function stdRules(){return {pawnFirst:2,ep:'normal',promo:['Q','R','B','N'],castling:true,hidden:false,win:'mate'};}
+function stdSetup(w,h,back){
+  back=back||BACK[w]||BACK[8].slice(0,w);
+  const b=Array(w*h).fill('');
+  for(let x=0;x<w;x++){
+    const t=back[x]||'N';
+    b[x]='w'+t; b[(h-1)*w+x]='b'+t;
+    if(h>=4){b[w+x]='wP'; b[(h-2)*w+x]='bP';}
+  }
+  return b;
+}
+/* ================= Engine ================= */
+function sym(a,b){const seen=new Set(),out=[];for(const [x,y] of [[a,b],[b,a]])for(const sx of [1,-1])for(const sy of [1,-1]){const X=x*sx,Y=y*sy;if(X===0&&Y===0)continue;const k=X+','+Y;if(!seen.has(k)){seen.add(k);out.push([X,Y]);}}return out;}
+const inB=(v,x,y)=>x>=0&&y>=0&&x<v.w&&y<v.h;
+const QUEEN_FALLBACK=[{k:'ride',a:1,b:0,r:0,mode:'both'},{k:'ride',a:1,b:1,r:0,mode:'both'}];
+
+function pseudo(v,G,i,board){
+  board=board||G.board;
+  const p=board[i]; if(!p) return [];
+  const T=v.types[p.t]; if(!T) return [];
+  const x=i%v.w,y=(i/v.w)|0,out=[];
+  const add=(to,cap,ex)=>out.push(Object.assign({from:i,to,cap},ex||{}));
+  const defs=(moves,ex)=>{
+    for(const d of moves||[]){
+      const r=d.k==='leap'?1:(d.r>0?d.r:99);
+      for(const [dx,dy] of sym(+d.a||0,+d.b||0)){
+        let cx=x,cy=y,blocked=false;
+        for(let s=0;s<r;s++){
+          cx+=dx;cy+=dy; if(!inB(v,cx,cy))break;
+          const j=cy*v.w+cx,q=board[j];
+          if(!q){ if(!blocked&&d.mode!=='capture') add(j,null,ex); }
+          else {
+            // pierce: darf hinter Figuren schlagen, aber Könige nur mit freier Bahn
+            const royalQ=q.royal||(v.types[q.t]&&v.types[q.t].royal);
+            if(q.c!==p.c&&d.mode!=='move'&&(!blocked||!royalQ)) add(j,j,ex);
+            if(!d.pierce) break;
+            blocked=true;
+          }
+        }
+      }
+    }
+  };
+  if(T.pawn){
+    const dir=p.c==='w'?1:-1,last=p.c==='w'?v.h-1:0;
+    const pr=to=>((to/v.w)|0)===last;
+    const ny=y+dir;
+    if(inB(v,x,ny)&&!board[ny*v.w+x]){
+      const one=ny*v.w+x; add(one,null,{promo:pr(one)});
+      if(!p.m){const passed=[one];
+        for(let k=2;k<=(v.rules.pawnFirst||1);k++){const yy=y+dir*k;if(!inB(v,x,yy)||board[yy*v.w+x])break;const to=yy*v.w+x;add(to,null,{dbl:true,passed:passed.slice(),promo:pr(to)});passed.push(to);}
+      }
+    }
+    for(const dx of [-1,1]){
+      const cx=x+dx; if(!inB(v,cx,ny))continue;
+      const to=ny*v.w+cx,q=board[to];
+      if(q){ if(q.c!==p.c) add(to,to,{promo:pr(to)}); }
+      else if(v.rules.ep==='normal'&&G.ep&&G.ep.sq.includes(to)&&board[G.ep.cap]&&board[G.ep.cap].c!==p.c){ add(to,G.ep.cap,{ep:true,promo:pr(to)}); }
+      else if(v.rules.ep==='always'){
+        const side=y*v.w+cx,s=board[side];
+        if(s&&s.c!==p.c&&v.types[s.t]&&v.types[s.t].pawn) add(to,side,{ep:true,promo:pr(to)});
+      }
+    }
+    defs(T.moves);
+    if(p.h){
+      const have=new Set(out.map(m=>m.to)),n=out.length;
+      defs(v.types.Q?v.types.Q.moves:QUEEN_FALLBACK,{reveal:true});
+      const extra=out.splice(n).filter(m=>!have.has(m.to));
+      out.push(...extra);
+    }
+  } else defs(T.moves);
+  return out;
+}
+function attacked(v,board,sq,by){
+  const b=board.slice(); b[sq]={c:other(by),t:'__',royal:true};
+  const G={ep:null};
+  for(let i=0;i<b.length;i++){const p=b[i];if(p&&p.c===by){for(const m of pseudo(v,G,i,b))if(m.cap===sq)return true;}}
+  return false;
+}
+function royals(v,board,c){const r=[];board.forEach((p,i)=>{if(p&&p.c===c&&v.types[p.t]&&v.types[p.t].royal)r.push(i);});return r;}
+function inCheck(v,board,c){return royals(v,board,c).some(i=>attacked(v,board,i,other(c)));}
+function castles(v,G,i){
+  const p=G.board[i],T=v.types[p.t];
+  if(!v.rules.castling||!T||!T.royal||p.m)return [];
+  if(inCheck(v,G.board,p.c))return [];
+  const x=i%v.w,y=(i/v.w)|0,res=[];
+  for(const d of [-1,1]){
+    let cx=x+d; while(inB(v,cx,y)&&!G.board[y*v.w+cx])cx+=d;
+    if(!inB(v,cx,y))continue;
+    const r=G.board[y*v.w+cx];
+    if(r.c!==p.c||r.m||!v.types[r.t]||!v.types[r.t].castle)continue;
+    if(Math.abs(cx-x)<3)continue;
+    const k1=y*v.w+x+d,k2=y*v.w+x+2*d;
+    if(attacked(v,G.board,k1,other(p.c))||attacked(v,G.board,k2,other(p.c)))continue;
+    res.push({from:i,to:k2,cap:null,castle:true,side:Math.abs(cx-x)>3?'lang':'kurz',rookFrom:y*v.w+cx,rookTo:k1});
+  }
+  return res;
+}
+function simulate(board,m){
+  const b=board.slice(),p=b[m.from];
+  if(m.cap!=null)b[m.cap]=null; b[m.from]=null; b[m.to]=p;
+  if(m.castle){b[m.rookTo]=b[m.rookFrom];b[m.rookFrom]=null;}
+  return b;
+}
+function legalMoves(v,G,c){
+  const all=[];
+  G.board.forEach((p,i)=>{if(p&&p.c===c){all.push(...pseudo(v,G,i));all.push(...castles(v,G,i));}});
+  if(v.rules.dice){
+    if(!G.dice)return [];
+    const vals=G.dice.filter(x=>!x.used).map(x=>x.v);
+    return all.filter(m=>vals.includes(dieOf(v,G.board[m.from].t)));
+  }
+  if(v.rules.win!=='mate')return all;
+  return all.filter(m=>!inCheck(v,simulate(G.board,m),c));
+}
+function snapStr(board){return board.map(p=>p?p.c+p.t:'').join(',');}
+function snapBoard(str){return str.split(',').map(x=>x?{c:x[0],t:x.slice(1),m:true,h:false}:null);}
+function newGame(v){
+  const board=v.setup.map(s=>{if(!s)return null;const t=s.slice(1);return v.types[t]?{c:s[0],t,m:false,h:false}:null;});
+  const rs={w:royals(v,board,'w').length,b:royals(v,board,'b').length};
+  const G={board,turn:'w',ep:null,last:null,hist:[],result:null,royalStart:rs,picks:{w:null,b:null},picked:!hiddenOn(v),ply:0,snaps:[{b:snapStr(board),l:null}],caps:{w:[],b:[]}};
+  if(hiddenOn(v)){for(const c of ['w','b'])if(!board.some(p=>p&&p.c===c&&v.types[p.t].pawn))G.picks[c]=-1;}
+  return G;
+}
+function hiddenOn(v){return !!(v.rules.hidden&&v.types.Q);}
+function applyPicks(G,picks){
+  const g=Object.assign({},G,{picks:Object.assign({},G.picks,picks||{})});
+  if(!g.picked&&g.picks.w!==null&&g.picks.b!==null){
+    g.board=g.board.slice();
+    for(const c of ['w','b']){const i=g.picks[c];if(i>=0&&g.board[i]&&g.board[i].c===c)g.board[i]=Object.assign({},g.board[i],{h:true});}
+    g.picked=true;
+  }
+  return g;
+}
+function sqName(v,i){return FILES[i%v.w]+(((i/v.w)|0)+1);}
+function doMove(v,G,m,promoT){
+  const b=G.board.slice(),orig=b[m.from],p=Object.assign({},orig,{m:true}),cap=m.cap!=null?b[m.cap]:null;
+  if(m.cap!=null)b[m.cap]=null;
+  b[m.from]=null;
+  if(m.reveal){p.t='Q';p.h=false;}
+  if(m.promo&&promoT){p.t=promoT;p.h=false;}
+  b[m.to]=p;
+  if(m.castle){b[m.rookTo]=Object.assign({},b[m.rookFrom],{m:true});b[m.rookFrom]=null;}
+  const ng=Object.assign({},G,{board:b,turn:other(G.turn),ep:m.dbl?{sq:m.passed,cap:m.to}:null,last:{from:m.from,to:m.to},ply:G.ply+1});
+  let n;
+  if(m.castle) n=m.side==='kurz'?'O-O':'O-O-O';
+  else n=(v.types[orig.t]?v.types[orig.t].glyph:'?')+' '+sqName(v,m.from)+(cap?'×':'–')+sqName(v,m.to);
+  if(m.ep)n+=' e.p.';
+  if(m.promo&&promoT)n+=' = '+v.types[promoT].glyph;
+  if(m.reveal)n+=' (Dame!)';
+  ng.result=judge(v,ng);
+  if(ng.result&&ng.result.why==='Schachmatt')n+='#';
+  else if(v.rules.win==='mate'&&inCheck(v,b,ng.turn))n+='+';
+  ng.hist=G.hist.concat([n]);
+  if(G.snaps)ng.snaps=G.snaps.concat([{b:snapStr(b),l:[m.from,m.to]}]);
+  if(G.caps&&cap){ng.caps={w:G.caps.w.slice(),b:G.caps.b.slice()};ng.caps[orig.c].push(cap.h?'P':cap.t);}
+  return ng;
+}
+/* ---- Würfelschach ---- */
+const DIE_T={1:'P',2:'N',3:'B',4:'R',5:'Q',6:'K'};
+function dieOf(v,t){const T=v.types[t];if(T&&T.pawn)return 1;if(T&&T.royal)return 6;return {N:2,B:3,R:4,Q:5}[t]||0;}
+function rollDice(G){
+  const r=()=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return 1+a[0]%6;}catch(e){return 1+Math.floor(Math.random()*6);}};
+  return Object.assign({},G,{dice:[r(),r(),r()].map(n=>({v:n,used:false}))});
+}
+function endTurn(v,G,noMove){
+  const ng=Object.assign({},G,{turn:other(G.turn),dice:null});
+  if(ng.ep&&ng.ep.by===ng.turn)ng.ep=null;
+  if(noMove)ng.hist=G.hist.concat(['(kein Zug)']);
+  return ng;
+}
+function playMove(v,G,m,promoT){
+  let ng=doMove(v,G,m,promoT);
+  if(!v.rules.dice)return ng;
+  const die=dieOf(v,G.board[m.from].t),dice=G.dice.map(x=>Object.assign({},x));
+  const k=dice.findIndex(x=>!x.used&&x.v===die);if(k>=0)dice[k].used=true;
+  if(G.dice.some(x=>x.used)){const h=ng.hist.slice(),last=h.pop();h[h.length-1]+=' · '+last;ng.hist=h;}
+  ng.turn=G.turn;ng.dice=dice;
+  ng.ep=m.dbl?{sq:m.passed,cap:m.to,by:G.turn}:G.ep;
+  if(ng.result){ng.dice=null;return ng;}
+  if(dice.every(x=>x.used)||legalMoves(v,ng,ng.turn).length===0)ng=endTurn(v,ng,false);
+  return ng;
+}
+function judge(v,G){
+  const c=G.turn,o=other(c),cnt={w:0,b:0};
+  G.board.forEach(p=>{if(p)cnt[p.c]++;});
+  if(cnt[c]===0)return {winner:o,why:'Keine Figuren mehr'};
+  const r=royals(v,G.board,c).length;
+  if(G.royalStart[c]>0&&r===0)return {winner:o,why:'König geschlagen'};
+  if(v.rules.dice)return null;
+  if(legalMoves(v,G,c).length===0){
+    if(v.rules.win==='mate'&&r>0&&inCheck(v,G.board,c))return {winner:o,why:'Schachmatt'};
+    return {winner:null,why:'Patt'};
+  }
+  return null;
+}
+
+/* ================= Descriptions ================= */
+function descMove(d){
+  const a=+d.a,b=+d.b,lo=Math.min(a,b),hi=Math.max(a,b);
+  let s;
+  if(d.k==='leap'){
+    if(hi===1&&lo===0)s='1 Feld gerade';else if(hi===1&&lo===1)s='1 Feld diagonal';
+    else if(lo===0)s='Sprung '+hi+' gerade';else if(lo===hi)s='Sprung '+hi+' diagonal';else s='Sprung '+hi+' + '+lo;
+  }else{
+    const dir=lo===0?'gerade':lo===hi?'diagonal':(hi+'+'+lo+'-Linie');
+    s=(d.r>0?'bis '+d.r+' Felder ':'beliebig weit ')+dir;
+  }
+  if(d.pierce)s+=', schlägt auch durch Figuren hindurch (König nur mit freier Bahn)';
+  if(d.mode==='move')s+=' (nur ziehen)';if(d.mode==='capture')s+=' (nur schlagen)';
+  return s;
+}
+function descType(T){
+  const parts=[];
+  if(T.pawn)parts.push('zieht wie ein Bauer');
+  parts.push(...(T.moves||[]).map(descMove));
+  return parts.join(', ')||'kann nicht ziehen';
+}
+function sameMoves(a,b){return JSON.stringify((a||[]).map(m=>[m.k,Math.max(m.a,m.b),Math.min(m.a,m.b),m.k==='leap'?0:+m.r,m.mode]).sort())===JSON.stringify((b||[]).map(m=>[m.k,Math.max(m.a,m.b),Math.min(m.a,m.b),m.k==='leap'?0:+m.r,m.mode]).sort());}
+function diffs(v){
+  const out=[],std=stdTypes(),sr=stdRules();
+  if(v.w!==8||v.h!==8)out.push('Brett '+v.w+'×'+v.h);
+  for(const [id,T] of Object.entries(v.types)){
+    const S=std[id];
+    if(!S)out.push(T.name+' (neu): '+descType(T));
+    else if(!sameMoves(S.moves,T.moves)||!!S.pawn!==!!T.pawn)out.push(T.name+': '+descType(T));
+    else if(!!S.royal!==!!T.royal)out.push(T.name+(T.royal?' ist König':' ist kein König mehr'));
+  }
+  for(const id of Object.keys(std))if(!v.types[id])out.push(std[id].name+' gestrichen');
+  if(hiddenOn(v))out.push('Versteckte Dame');
+  if(v.rules.ep==='always')out.push('En passant immer');
+  if(v.rules.ep==='off')out.push('Kein en passant');
+  if(v.rules.pawnFirst!==sr.pawnFirst)out.push('Bauer startet mit '+v.rules.pawnFirst+(v.rules.pawnFirst===1?' Feld':' Feldern'));
+  if(!v.rules.castling)out.push('Keine Rochade');
+  if(v.rules.win==='capture')out.push('König schlagen gewinnt');
+  if(JSON.stringify(v.setup)!==JSON.stringify(stdSetup(v.w,v.h))&&v.w===8&&v.h===8)out.push('Eigene Aufstellung');
+  if(v.rules.promo.join()!==sr.promo.join())out.push('Umwandlung: '+v.rules.promo.map(t=>v.types[t]?v.types[t].name:t).join(', '));
+  return out;
+}
+
+
+/* ================= Regel-Katalog =================
+   Neue Regeln: einfach hier einen Eintrag ergänzen. apply() verändert die Variante. */
+const RULES=[
+  {id:'tuerme',name:'Nur Türme',desc:'Alle Offiziere außer dem König sind Türme. Bauern verwandeln sich in Türme.',
+    apply:v=>{v.setup=stdSetup(8,8,'RRRRKRRR');v.rules.promo=['R'];}},
+  {id:'zufall',name:'Zufällige Aufstellung',desc:'Die hintere Reihe (Dame, König, Türme …) wird bei jeder Partie zufällig gemischt. Schwarz steht spiegelbildlich gleich. Rochade gibt es dabei nicht.',
+    apply:v=>{const row=v.setup.slice(0,v.w).map(x=>x.slice(1));
+      for(let i=row.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[row[i],row[j]]=[row[j],row[i]];}
+      for(let x=0;x<v.w;x++){v.setup[x]='w'+row[x];v.setup[(v.h-1)*v.w+x]='b'+row[x];}
+      v.rules.castling=false;}},
+  {id:'springer31',name:'Langer Springer',desc:'Der Springer springt 3 + 1 statt 2 + 1.',
+    apply:v=>{v.types.N.name='Springer 3+1';v.types.N.mark='3';v.types.N.moves=[{k:'leap',a:1,b:3,r:0,mode:'both'}];}},
+  {id:'versteckt',name:'Versteckte Dame',desc:'Vor dem Spiel wählt jede Seite heimlich einen Bauern. Er darf jederzeit wie eine Dame ziehen und ist dann enthüllt.',
+    apply:v=>{v.rules.hidden=true;}},
+  {id:'epimmer',name:'En passant immer',desc:'Ein Bauer darf jeden gegnerischen Bauern direkt neben sich schlagen, nicht nur direkt nach dem Doppelschritt.',
+    apply:v=>{v.rules.ep='always';}},
+  {id:'bauer3',name:'Bauern-Sprint',desc:'Bauern dürfen beim ersten Zug bis zu 3 Felder weit ziehen.',
+    apply:v=>{v.rules.pawnFirst=3;}},
+  {id:'roentgen',name:'Röntgen-Läufer',desc:'Der Läufer schlägt durch Figuren hindurch: Er darf auch die 2. oder 3. gegnerische Figur auf seiner Diagonale schlagen. Ziehen nur mit freier Bahn, den König greift er nur mit freier Bahn an.',
+    apply:v=>{v.types.B.name='Röntgen-Läufer';v.types.B.mark='X';v.types.B.moves=[{k:'ride',a:1,b:1,r:0,mode:'both',pierce:true}];}},
+  {id:'keinerochade',name:'Keine Rochade',desc:'Rochieren ist verboten.',
+    apply:v=>{v.rules.castling=false;}},
+  {id:'koenigschlagen',name:'König schlagen',desc:'Es gibt kein Schach und kein Matt. Wer seinen König verliert, hat verloren.',
+    apply:v=>{v.rules.win='capture';}},
+  {id:'wuerfel',name:'Würfelschach',desc:'Wer dran ist, würfelt mit 3 Würfeln und zieht danach bis zu 3-mal passend dazu: 1 Bauer, 2 Springer, 3 Läufer, 4 Turm, 5 Dame, 6 König. Dieselbe Figur darf mehrmals ziehen. Es gibt kein Schach: Wer den König schlägt, gewinnt.',
+    apply:v=>{v.rules.dice=true;v.rules.win='capture';}}
+];
+function buildVariant(ids){
+  ids=RULES.map(r=>r.id).filter(id=>ids.includes(id));
+  const v={w:8,h:8,types:stdTypes(),rules:stdRules(),setup:stdSetup(8,8)};
+  for(const r of RULES)if(ids.includes(r.id))r.apply(v);
+  v.ruleIds=ids;
+  v.name=ids.length?RULES.filter(r=>ids.includes(r.id)).map(r=>r.name).join(' · '):'Klassisches Schach';
+  return v;
+}
+
+/* ================= Speicher ================= */
+const LS={get(k,d){try{const s=localStorage.getItem(k);return s?JSON.parse(s):d;}catch(e){return d;}},set(k,val){try{localStorage.setItem(k,JSON.stringify(val));}catch(e){}}};
+const rid=n=>{const a='abcdefghjkmnpqrstuvwxyz23456789';let s='';for(let k=0;k<n;k++)s+=a[Math.floor(Math.random()*a.length)];return s;};
+const normKey=n=>String(n||'').trim().toLowerCase().replace(/\s+/g,' ').replace(/[\/#+\u0000-\u001f]/g,'').slice(0,24);
+let dev=LS.get('hrs-dev',null);if(!dev){dev=rid(12);LS.set('hrs-dev',dev);}
+
+const S={
+  view:'home',me:LS.get('hrs-me',null),
+  localRules:LS.get('hrs-rules-local',[]),onlineRules:LS.get('hrs-rules-online',[]),
+  local:LS.get('hrs-local',null),
+  sel:null,flip:false,reveal:false,pickReady:false,pendingPromo:null,
+  gid:null,games:{},picks:{},index:{},invites:{},presence:{},owner:{},
+  conn:'aus',oppInput:'',challengeErr:'',nameErr:'',nameDraft:'',nameTaken:false,
+  presAsked:{},
+  friends:LS.get('hrs-friends',{list:[],ts:0}),drawer:false,friendInput:'',friendErr:'',
+  replay:null
+};
+const view=document.getElementById('view'),overlay=document.getElementById('overlay'),toastEl=document.getElementById('toast');
+let toastT;function toast(m){toastEl.textContent=m;toastEl.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>toastEl.hidden=true,2800);}
+function showOverlay(h){overlay.innerHTML='<div class="sheet" role="dialog" aria-modal="true">'+h+'</div>';overlay.hidden=false;}
+function hideOverlay(){overlay.hidden=true;overlay.innerHTML='';}
+let rq=false;function render(){if(rq)return;rq=true;requestAnimationFrame(()=>{rq=false;draw();});}
+
+/* ================= Netz (öffentliche MQTT-Broker, kein Konto nötig) ================= */
+const P='hausregelschach-cp/v1/';
+const BROKERS=['wss://broker.emqx.io:8084/mqtt','wss://broker.hivemq.com:8884/mqtt'];
+const Net={clients:[],subs:new Set(),
+  start(){
+    if(Net.clients.length||!S.me)return;
+    if(!window.mqtt){S.conn='fehler';render();return;}
+    const will={topic:P+'u/'+S.me.key+'/status',payload:JSON.stringify({name:S.me.name,online:false}),retain:true,qos:1};
+    for(const url of BROKERS){
+      let c;try{c=mqtt.connect(url,{clientId:'hrs_'+rid(10),clean:true,reconnectPeriod:4000,connectTimeout:12000,keepalive:30,will});}catch(e){continue;}
+      c._ok=false;
+      c.on('connect',()=>{c._ok=true;Net.update();
+        for(const t of Net.subs)c.subscribe(t,{qos:1});
+        c.publish(P+'u/'+S.me.key+'/status',JSON.stringify({name:S.me.name,online:!document.hidden,seen:Date.now()}),{retain:true,qos:1});
+        // eigene Spielstände auf diesem Broker auffrischen
+        for(const gid in S.games){const d=S.games[gid];if(d&&isMine(d))c.publish(P+'g/'+gid,JSON.stringify(d),{retain:true,qos:1});}
+      });
+      c.on('close',()=>{c._ok=false;Net.update();});
+      c.on('error',()=>{});
+      c.on('message',(t,b)=>onMsg(t,b.toString()));
+      Net.clients.push(c);
+    }
+    Net.update();
+  },
+  update(){const n=Net.clients.filter(c=>c._ok).length;const s=n?'online':(Net.clients.length?'verbinde':'fehler');if(s!==S.conn){S.conn=s;render();}},
+  sub(t){if(Net.subs.has(t))return;Net.subs.add(t);for(const c of Net.clients)if(c._ok)c.subscribe(t,{qos:1});},
+  unsub(t){if(!Net.subs.delete(t))return;for(const c of Net.clients)if(c._ok)c.unsubscribe(t);},
+  pub(t,obj){const s=obj==null?'':JSON.stringify(obj);for(const c of Net.clients)c.publish(t,s,{retain:true,qos:1});},
+  stop(){for(const c of Net.clients){try{c.end(true);}catch(e){}}Net.clients=[];Net.subs.clear();S.conn='aus';}
+};
+function isMine(d){return d.players&&((d.players.w&&d.players.w.key===S.me.key)||(d.players.b&&d.players.b.key===S.me.key));}
+function myColor(d){if(!d||!S.me)return null;if(d.players.w.key===S.me.key)return 'w';if(d.players.b.key===S.me.key)return 'b';return null;}
+function oppOf(d){const c=myColor(d);return c?d.players[other(c)]:null;}
+function watchGame(gid){Net.sub(P+'g/'+gid);Net.sub(P+'g/'+gid+'/pick/+');}
+function onMsg(topic,payload){
+  if(!topic.startsWith(P))return;
+  const parts=topic.slice(P.length).split('/');let data=null;
+  if(payload){try{data=JSON.parse(payload);}catch(e){return;}}
+  const me=S.me&&S.me.key;
+  if(parts[0]==='u'){
+    const key=parts[1],kind=parts[2];
+    if(kind==='status'){S.presence[key]=data;render();return;}
+    if(kind==='owner'){S.owner[key]=data||null;return;}
+    if(key!==me)return;
+    if(kind==='friends'){if(data&&data.list&&data.ts>(S.friends.ts||0)){S.friends=data;LS.set('hrs-friends',data);watchFriends();render();}return;}
+    if(kind==='inbox'){const gid=parts[3];if(!data)delete S.invites[gid];else{S.invites[gid]=data;watchGame(gid);Net.sub(P+'u/'+normKey(data.fromKey)+'/status');}render();return;}
+    if(kind==='games'){const gid=parts[3];if(!data){delete S.index[gid];}else{S.index[gid]=data;watchGame(gid);}render();return;}
+  }
+  if(parts[0]==='g'){
+    const gid=parts[1];
+    if(parts[2]==='pick'){if(!data)return;(S.picks[gid]=S.picks[gid]||{})[parts[3]]=data.i;render();return;}
+    if(!data)return;
+    const old=S.games[gid];
+    if(old&&old.rev>=data.rev)return;
+    S.games[gid]=data;
+    const o=oppOf(data);if(o)Net.sub(P+'u/'+o.key+'/status');
+    if(S.view==='game'&&S.gid===gid){
+      if(old&&old.state.ply!==data.state.ply)S.sel=null;
+      if(data.next&&(!old||!old.next)&&S.games[data.next]){openGame(data.next);toast('Revanche! Die Farben sind getauscht.');return;}
+      if(old&&old.status==='invited'&&data.status==='active')toast(o.name+' hat angenommen. Los geht’s!');
+      if(old&&data.status==='declined'&&old.status!=='declined')toast(o.name+' hat abgelehnt.');
+    }
+    if(data.next)watchGame(data.next);
+    render();
+  }
+}
+function subscribeMe(){
+  const k=S.me.key;
+  Net.sub(P+'u/'+k+'/inbox/+');Net.sub(P+'u/'+k+'/games/+');Net.sub(P+'u/'+k+'/owner');Net.sub(P+'u/'+k+'/friends');
+  watchFriends();
+}
+/* ---- Freunde ---- */
+function watchFriends(){for(const f of S.friends.list)Net.sub(P+'u/'+f.key+'/status');}
+function saveFriends(){S.friends.ts=Date.now();LS.set('hrs-friends',S.friends);if(S.me)Net.pub(P+'u/'+S.me.key+'/friends',S.friends);}
+function addFriend(name,silent){
+  name=String(name||'').trim().replace(/\s+/g,' ');const key=normKey(name);
+  if(!key){if(!silent){S.friendErr='Gib einen Namen ein.';render();}return;}
+  if(S.me&&key===S.me.key){if(!silent){S.friendErr='Das bist du selbst.';render();}return;}
+  if(S.friends.list.some(f=>f.key===key)){if(!silent){S.friendErr=name+' ist schon in deiner Liste.';render();}return;}
+  S.friends={list:S.friends.list.concat([{key,name}]),ts:S.friends.ts};
+  saveFriends();Net.sub(P+'u/'+key+'/status');
+  if(!silent){S.friendInput='';S.friendErr='';S.presAsked[key]=Date.now();setTimeout(render,2600);toast(name+' ist jetzt in deiner Freundesliste.');render();}
+}
+function removeFriend(key){S.friends={list:S.friends.list.filter(f=>f.key!==key),ts:S.friends.ts};saveFriends();render();}
+function ago(ts){const m=Math.round((Date.now()-ts)/60000);if(m<1)return 'gerade eben';if(m<60)return 'vor '+m+' Min.';const h=Math.round(m/60);if(h<24)return 'vor '+h+' Std.';const d=Math.round(h/24);return 'vor '+d+(d===1?' Tag':' Tagen');}
+function friendState(key){
+  const p=S.presence[key];
+  if(p&&p.online)return {on:true,txt:'online'};
+  if(p===undefined)return {on:false,txt:Date.now()-(S.presAsked[key]||0)<2500?'…':'noch nie online'};
+  return {on:false,txt:p&&p.seen?'zuletzt online '+ago(p.seen):'offline'};
+}
+function onlineFriends(){return S.friends.list.filter(f=>friendState(f.key).on).length;}
+function friendListHTML(){
+  if(!S.friends.list.length)return '<p class="small muted">Noch keine Freunde. Füg sie mit ihrem Spielnamen hinzu. Gegner aus Online-Partien landen automatisch hier.</p>';
+  const L=S.friends.list.slice().sort((a,b)=>(friendState(b.key).on-friendState(a.key).on)||a.name.localeCompare(b.name));
+  return L.map(f=>{const st=friendState(f.key);const p=S.presence[f.key];const nm=(p&&p.name)||f.name;
+    return '<div class="fr'+(st.on?' on':'')+'"><span class="frdot"></span><div class="frtxt"><b>'+esc(nm)+'</b><span class="small muted">'+esc(st.txt)+'</span></div>'+
+    '<button class="btn sm pri" data-act="fr-play" data-key="'+esc(f.key)+'" type="button">Spielen</button>'+
+    '<button class="btn sm ghost" data-act="fr-del" data-key="'+esc(f.key)+'" type="button" aria-label="'+esc(nm)+' entfernen">✕</button></div>';}).join('');
+}
+function drawDrawer(){
+  const dr=document.getElementById('drawer'),bg=document.getElementById('drawerbg'),btn=document.getElementById('frbtn');
+  btn.hidden=!S.me;
+  const n=onlineFriends();document.getElementById('frcnt').textContent=n?n:'';
+  dr.classList.toggle('open',!!S.drawer);bg.classList.toggle('open',!!S.drawer);
+  if(!S.drawer||!S.me)return;
+  const ae=document.activeElement;
+  if(ae&&ae.id==='friendinp'&&document.getElementById('frlist')){document.getElementById('frlist').innerHTML=friendListHTML();return;}
+  dr.innerHTML='<div class="drhead"><h2>Freunde</h2><button class="btn sm ghost" data-act="drawer-close" type="button" aria-label="Schließen">✕</button></div>'+
+    '<div class="row"><input type="text" id="friendinp" maxlength="24" autocomplete="off" placeholder="Spielname, z. B. Leo" value="'+esc(S.friendInput)+'" style="flex:1;min-width:0"><button class="btn sm" data-act="fr-add" type="button">Hinzufügen</button></div>'+
+    (S.friendErr?'<p class="small" style="color:var(--danger)">'+esc(S.friendErr)+'</p>':'')+
+    '<div id="frlist" class="frlist">'+friendListHTML()+'</div>'+
+    '<p class="small muted">Online heißt: Die App ist gerade bei ihm offen.</p>';
+}
+
+/* ================= Online-Aktionen ================= */
+function onlineG(d){
+  const pk=S.picks[d.gid]||{};
+  const base=d.state.picks||{w:null,b:null};
+  const picks={w:pk.w!=null?pk.w:base.w,b:pk.b!=null?pk.b:base.b};
+  return applyPicks(Object.assign({},d.state,{picks}),{});
+}
+function pubGame(d){S.games[d.gid]=d;Net.pub(P+'g/'+d.gid,d);render();}
+function challenge(){
+  const name=S.oppInput.trim(),key=normKey(name);
+  if(!key){S.challengeErr='Gib den Namen deines Freundes ein.';return render();}
+  if(key===S.me.key){S.challengeErr='Das bist du selbst. Gib den Namen deines Freundes ein.';return render();}
+  if(S.conn!=='online'){S.challengeErr='Keine Verbindung. Prüf dein Internet und versuch es gleich noch einmal.';return render();}
+  const v=buildVariant(S.onlineRules),gid=rid(10),meW=Math.random()<.5;
+  const mine={key:S.me.key,name:S.me.name},opp={key,name};
+  const G=newGame(v);
+  const d={gid,rev:1,status:'invited',players:meW?{w:mine,b:opp}:{w:opp,b:mine},variant:v,state:G,ts:Date.now()};
+  watchGame(gid);pubGame(d);addFriend(name,true);
+  Net.pub(P+'u/'+S.me.key+'/games/'+gid,{gid,ts:d.ts});
+  Net.pub(P+'u/'+key+'/inbox/'+gid,{gid,from:S.me.name,fromKey:S.me.key,rules:v.ruleIds,ts:d.ts});
+  S.index[gid]={gid,ts:d.ts};
+  S.oppInput='';S.challengeErr='';
+  openGame(gid);
+}
+function acceptInvite(gid){
+  const d=S.games[gid];if(!d){toast('Die Partie lädt noch. Versuch es gleich nochmal.');return;}
+  if(d.status!=='invited'){Net.pub(P+'u/'+S.me.key+'/inbox/'+gid,null);delete S.invites[gid];toast('Diese Herausforderung gilt nicht mehr.');return render();}
+  const c=myColor(d);if(!c){toast('Diese Herausforderung ist nicht für dich.');return;}
+  const nd=clone(d);nd.status='active';nd.rev=d.rev+1;nd.players[c].name=S.me.name;nd.ts=Date.now();
+  pubGame(nd);addFriend(nd.players[other(c)].name,true);
+  Net.pub(P+'u/'+S.me.key+'/games/'+gid,{gid,ts:nd.ts});
+  Net.pub(P+'u/'+S.me.key+'/inbox/'+gid,null);delete S.invites[gid];
+  S.index[gid]={gid,ts:nd.ts};
+  openGame(gid);
+}
+function declineInvite(gid){
+  const d=S.games[gid];
+  if(d&&d.status==='invited'){const nd=clone(d);nd.status='declined';nd.rev=d.rev+1;pubGame(nd);}
+  Net.pub(P+'u/'+S.me.key+'/inbox/'+gid,null);delete S.invites[gid];render();
+}
+function cancelChallenge(gid){
+  const d=S.games[gid];if(!d)return;const o=oppOf(d);
+  const nd=clone(d);nd.status='canceled';nd.rev=d.rev+1;pubGame(nd);
+  if(o)Net.pub(P+'u/'+o.key+'/inbox/'+gid,null);
+}
+function removeGame(gid){Net.pub(P+'u/'+S.me.key+'/games/'+gid,null);delete S.index[gid];if(S.gid===gid){S.view='online';}render();}
+function rematch(gid){
+  const d=S.games[gid];if(!d)return;
+  const v=d.variant.ruleIds?buildVariant(d.variant.ruleIds):d.variant,ngid=rid(10),G=newGame(v);
+  const nd={gid:ngid,rev:1,status:'active',players:{w:clone(d.players.b),b:clone(d.players.w)},variant:v,state:G,ts:Date.now()};
+  watchGame(ngid);pubGame(nd);
+  for(const c of ['w','b'])Net.pub(P+'u/'+d.players[c].key+'/games/'+ngid,{gid:ngid,ts:nd.ts});
+  S.index[ngid]={gid:ngid,ts:nd.ts};
+  const od=clone(d);od.next=ngid;od.rev=d.rev+1;pubGame(od);
+  openGame(ngid);toast('Revanche! Die Farben sind getauscht.');
+}
+function resign(){
+  const ctx=gameCtx();if(!ctx)return;
+  if(ctx.mode==='online'){const d=S.games[S.gid],c=myColor(d);const nd=clone(d);nd.state=clone(onlineG(d));nd.state.result={winner:other(c),why:cname(c)+' hat aufgegeben'};nd.status='over';nd.rev=d.rev+1;pubGame(nd);}
+  hideOverlay();
+}
+function openGame(gid){S.gid=gid;S.sel=null;S.replay=null;S.view='game';watchGame(gid);render();window.scrollTo(0,0);}
+
+/* ================= Spielkontext ================= */
+function gameCtx(){
+  if(S.view!=='game')return null;
+  if(S.gid==='local'){if(!S.local)return null;return {mode:'local',v:S.local.v,G:S.local.G,me:null};}
+  const d=S.games[S.gid];if(!d)return null;
+  return {mode:'online',v:d.variant,G:onlineG(d),me:myColor(d),d};
+}
+function startLocal(){
+  const v=buildVariant(S.localRules);
+  S.local={v,G:newGame(v),undo:[]};S.sel=null;S.flip=false;S.replay=null;S.pickReady=false;saveLocal();
+  S.gid='local';S.view='game';render();window.scrollTo(0,0);
+}
+function saveLocal(){LS.set('hrs-local',S.local?{v:S.local.v,G:S.local.G,undo:(S.local.undo||[]).slice(-40)}:null);}
+
+function onSquare(i){
+  if(S.replay!=null){S.replay=null;render();return;}
+  const ctx=gameCtx();if(!ctx)return;
+  const {v,G,mode,me,d}=ctx;
+  if(G.result)return;
+  if(mode==='online'&&d.status!=='active')return;
+  if(hiddenOn(v)&&!G.picked){
+    const pc=mode==='local'?(G.picks.w===null?'w':'b'):(me&&G.picks[me]===null?me:null);
+    const p=G.board[i];
+    if(!pc||!p||p.c!==pc||!v.types[p.t].pawn)return;
+    if(mode==='local'){
+      S.local.G=applyPicks(Object.assign({},G,{picks:Object.assign({},G.picks,{[pc]:i})}),{});S.pickReady=false;saveLocal();hideOverlay();
+      if(S.local.G.picked)toast('Beide Damen sind versteckt. Weiß beginnt.');
+    } else {
+      (S.picks[d.gid]=S.picks[d.gid]||{})[pc]=i;
+      Net.pub(P+'g/'+d.gid+'/pick/'+pc,{i});toast('Deine Dame ist versteckt.');
+    }
+    return render();
+  }
+  if(mode==='online'&&(!me||me!==G.turn))return;
+  const p=G.board[i];
+  if(S.sel!=null){
+    const legal=legalMoves(v,G,G.turn).filter(m=>m.from===S.sel&&m.to===i);
+    if(legal.length){
+      legal.sort((a,b)=>(a.reveal?1:0)-(b.reveal?1:0));
+      const m=legal[0];
+      if(m.promo){
+        const opts=v.rules.promo.filter(t=>v.types[t]&&!v.types[t].pawn);
+        if(opts.length<=1)return commit(ctx,m,opts[0]||null);
+        S.pendingPromo=m;
+        showOverlay('<h2>Umwandlung</h2><p class="muted">Worin soll sich der Bauer verwandeln?</p><div class="promo">'+opts.map(t=>'<button type="button" data-act="promo" data-t="'+esc(t)+'" aria-label="'+esc(v.types[t].name)+'"><span class="pc '+G.turn+'">'+v.types[t].glyph+'</span>'+(v.types[t].mark?'<span class="mk">'+esc(v.types[t].mark)+'</span>':'')+'</button>').join('')+'</div>');
+        return;
+      }
+      return commit(ctx,m,null);
+    }
+  }
+  S.sel=(p&&p.c===G.turn&&S.sel!==i)?i:null;
+  render();
+}
+function commit(ctx,m,promoT){
+  const {v,G}=ctx;
+  const ng=playMove(v,G,m,promoT);
+  S.sel=null;hideOverlay();
+  if(m.reveal)toast('Die versteckte Dame ist enthüllt!');
+  else if(v.rules.dice&&!ng.result&&ng.turn!==G.turn&&G.dice.filter(x=>!x.used).length>1)toast('Mit den übrigen Würfeln geht kein Zug mehr.');
+  setState(ctx,ng,true);
+}
+function setState(ctx,ng,undoable){
+  const {G,mode,d}=ctx;
+  if(mode==='local'){if(undoable)S.local.undo=(S.local.undo||[]).concat([G]);S.local.G=ng;saveLocal();render();}
+  else{const nd=clone(d);nd.state=clone(ng);nd.rev=d.rev+1;nd.ts=Date.now();if(ng.result)nd.status='over';pubGame(nd);}
+}
+function diceHTML(v,G,canAct,who){
+  if(!v.rules.dice||G.result)return '';
+  const key='<span class="small muted">1 Bauer · 2 Springer · 3 Läufer · 4 Turm · 5 Dame · 6 König</span>';
+  if(!G.dice)return '<div class="dicebar">'+(canAct?'<button class="btn pri" data-act="roll" type="button">Würfeln</button>':'<span class="small">'+esc(who)+' würfelt gleich.</span>')+key+'</div>';
+  const rk=G.ply+':'+G.dice.map(x=>x.v).join(''),fresh=rk!==S.rollKey&&G.dice.every(x=>!x.used);S.rollKey=rk;
+  const faces=G.dice.map(x=>{const T=v.types[DIE_T[x.v]];return '<span class="die'+(x.used?' used':'')+(fresh?' fresh':'')+'" title="'+(T?esc(T.name):'')+'"><b>'+x.v+'</b><span class="pc '+G.turn+'">'+(T?T.glyph:'–')+'</span></span>';}).join('');
+  return '<div class="dicebar"><div class="dice">'+faces+'</div>'+(canAct?'<button class="btn sm" data-act="endturn" type="button">Zug beenden</button>':'')+'</div>';
+}
+
+/* ================= Ansichten ================= */
+function boardHTML(v,G,o){
+  const W=v.w,H=v.h,cells=[];
+  const pcs=Math.max(14,Math.floor(Math.min(560,(window.innerWidth||400)-36)/W*0.78));
+  for(let ry=0;ry<H;ry++)for(let rx=0;rx<W;rx++){
+    const x=o.flip?W-1-rx:rx,y=o.flip?ry:H-1-ry,i=y*W+x,p=G.board[i];
+    const cls=['sq',(x+y)%2?'l':'d'];
+    if(G.last&&(G.last.from===i||G.last.to===i))cls.push('last');
+    if(o.sel===i)cls.push('sel');
+    if(o.check&&o.check.includes(i))cls.push('chk');
+    const t=o.targets&&o.targets.get(i);if(t){cls.push('tg');if(t==='cap')cls.push('cp');}
+    if(o.pickColor&&p&&p.c===o.pickColor&&v.types[p.t]&&v.types[p.t].pawn)cls.push('pick');
+    let inner='';
+    if(ry===H-1)inner+='<span class="coord f">'+FILES[x]+'</span>';
+    if(rx===0)inner+='<span class="coord r">'+(y+1)+'</span>';
+    if(p){const T=v.types[p.t]||{glyph:'?',mark:''};
+      inner+='<span class="pc '+p.c+'">'+T.glyph+'</span>';
+      if(T.mark)inner+='<span class="mk">'+esc(T.mark)+'</span>';
+      if(p.h&&o.viewer===p.c)inner+='<span class="hid" title="Versteckte Dame">♛</span>';}
+    cells.push('<div class="'+cls.join(' ')+'" data-sq="'+i+'" role="button" aria-label="'+sqName(v,i)+'">'+inner+'</div>');
+  }
+  return '<div class="board" style="grid-template-columns:repeat('+W+',1fr);--pcs:'+pcs+'px">'+cells.join('')+'</div>';
+}
+function histHTML(G){
+  if(!G.hist.length)return '<p class="muted small">Noch keine Züge.</p>';
+  let h='';for(let k=0;k<G.hist.length;k+=2)h+='<span class="n">'+(k/2+1)+'.</span><span>'+fmtN(G.hist[k])+'</span><span>'+(G.hist[k+1]?fmtN(G.hist[k+1]):'')+'</span>';
+  return '<div class="hist" id="hist">'+h+'</div>';
+}
+function fmtN(n){const g=n.charAt(0);return /[♔-♟]/.test(g)?'<span class="g">'+g+'</span>'+esc(n.slice(1)):esc(n);}
+function activeRulesHTML(v){
+  const ids=v.ruleIds||[];
+  if(!ids.length)return '<p class="muted">Keine Sonderregeln, ganz normales Schach.</p>';
+  return '<ul class="rulelist">'+RULES.filter(r=>ids.includes(r.id)).map(r=>'<li><b>'+esc(r.name)+'</b>: '+esc(r.desc)+'</li>').join('')+'</ul>';
+}
+function ruleToggles(field){
+  const sel=S[field];
+  return '<div class="toggles">'+RULES.map(r=>
+    '<label class="rt"><span class="rt-text"><b>'+esc(r.name)+'</b><span class="small muted">'+esc(r.desc)+'</span></span>'+
+    '<input type="checkbox" class="switch" data-rule="'+r.id+'" data-field="'+field+'"'+(sel.includes(r.id)?' checked':'')+'></label>').join('')+'</div>'+
+    '<p class="small muted">'+(sel.length?sel.length+(sel.length===1?' Sonderregel aktiv':' Sonderregeln aktiv'):'Keine Sonderregel: normales Schach')+'</p>';
+}
+
+function drawName(){
+  view.innerHTML='<section class="hero"><span class="k big">♞</span><h1>Willkommen bei Hausregel-Schach</h1><p class="muted">Wie sollen deine Freunde dich finden? Unter diesem Namen können sie dich herausfordern.</p></section>'+
+  '<section class="card"><div class="field"><span class="lbl">Dein Name</span><input type="text" id="nameinp" class="wide" maxlength="24" autocomplete="nickname" placeholder="z. B. Chris" value="'+esc(S.nameDraft)+'"></div>'+
+  (S.nameErr?'<p class="small" style="color:var(--danger)">'+esc(S.nameErr)+'</p>':'')+
+  (S.nameTaken?'<div class="row"><button class="btn" data-act="name-other" type="button">Anderen Namen wählen</button><button class="btn pri" data-act="name-force" type="button">Das bin ich (anderes Gerät)</button></div>':
+  '<button class="btn pri" data-act="name-save" type="button" style="align-self:flex-start">Weiter</button>')+
+  '<p class="small muted">Groß- und Kleinschreibung ist egal. Du kannst den Namen später in den Einstellungen ändern.</p></section>';
+  const inp=document.getElementById('nameinp');if(inp&&!S.nameTaken)inp.focus();
+}
+function myTurnCount(){
+  let n=Object.keys(S.invites).filter(g=>{const d=S.games[g];return !d||d.status==='invited';}).length;
+  for(const gid in S.index){const d=S.games[gid];if(d&&d.status==='active'){const G=onlineG(d),c=myColor(d);if(c&&!G.result&&(hiddenOn(d.variant)&&!G.picked?G.picks[c]===null:G.turn===c))n++;}}
+  return n;
+}
+function drawHome(){
+  const n=myTurnCount();
+  const local=S.local&&S.local.G&&!S.local.G.result;
+  view.innerHTML='<section class="hero"><p class="hand">Hallo '+esc(S.me.name)+'</p><h1>Schach mit euren eigenen Regeln</h1></section>'+
+  '<nav class="menu">'+
+    '<button class="mbtn" data-act="go" data-v="local-setup" type="button"><span class="mi">♟</span><span><b>Am Handy spielen</b><span class="small muted">Zu zweit an einem Gerät</span></span></button>'+
+    '<button class="mbtn" data-act="go" data-v="online" type="button"><span class="mi">♞</span><span><b>Online spielen</b><span class="small muted">Freund per Name herausfordern</span></span>'+(n?'<span class="badge">'+n+'</span>':'')+'</button>'+
+    '<button class="mbtn" data-act="go" data-v="settings" type="button"><span class="mi">♜</span><span><b>Einstellungen</b><span class="small muted">Name, Regeln, Verbindung</span></span></button>'+
+  '</nav>'+
+  (local?'<section class="card"><div class="row" style="justify-content:space-between"><div style="min-width:0"><span class="lbl">Laufende Partie am Handy</span><h3>'+esc(S.local.v.name)+'</h3></div><button class="btn pri sm" data-act="resume" type="button">Weiterspielen</button></div></section>':'');
+}
+function drawLocalSetup(){
+  view.innerHTML='<section class="hero" style="padding-top:4px"><span class="lbl">Am Handy spielen</span><h1>Welche Regeln gelten?</h1></section>'+
+  '<section class="card">'+ruleToggles('localRules')+'</section>'+
+  '<div class="bar"><button class="btn ghost" data-act="go" data-v="home" type="button">Zurück</button><button class="btn pri" data-act="start-local" type="button">Partie starten</button></div>';
+}
+function presenceText(key){
+  const p=S.presence[key];
+  if(p===undefined&&Date.now()-(S.presAsked[key]||0)<2500)return '<span class="pres">Suche …</span>';
+  if(p===undefined)return '<span class="pres">Diesen Namen hat noch niemand benutzt. Die Herausforderung wartet, bis sich jemand so nennt.</span>';
+  if(p&&p.online)return '<span class="pres on">● '+esc(p.name)+' ist gerade online</span>';
+  return '<span class="pres">○ '+esc((p&&p.name)||key)+' ist offline. Die Herausforderung wartet auf sie/ihn.</span>';
+}
+function gameRow(gid){
+  const d=S.games[gid];
+  if(!d)return '<div class="grow"><div><b>Partie wird geladen …</b></div><button class="btn sm ghost" data-act="remove" data-gid="'+gid+'" type="button">Entfernen</button></div>';
+  const o=oppOf(d)||{name:'?'},c=myColor(d),G=onlineG(d);
+  let st,hot=false;
+  if(d.status==='invited')st='Warte auf Antwort';
+  else if(d.status==='declined')st='Abgelehnt';
+  else if(d.status==='canceled')st='Zurückgezogen';
+  else if(G.result)st=G.result.winner?(G.result.winner===c?'Gewonnen':'Verloren')+' · '+G.result.why:'Unentschieden';
+  else if(hiddenOn(d.variant)&&!G.picked){hot=G.picks[c]===null;st=hot?'Versteck deine Dame':'Gegner versteckt die Dame';}
+  else{hot=G.turn===c;st=hot?'Du bist dran':o.name+' ist dran';}
+  const p=S.presence[o.key];
+  return '<div class="grow'+(hot?' hot':'')+'"><button class="glink" data-act="open" data-gid="'+gid+'" type="button"><b>gegen '+esc(o.name)+'</b>'+(p&&p.online?' <span class="pres on">●</span>':'')+'<span class="small muted">'+esc(st)+' · '+esc(d.variant.name)+'</span></button>'+
+    ((d.status!=='active'||G.result)?'<button class="btn sm ghost" data-act="remove" data-gid="'+gid+'" type="button" aria-label="Aus der Liste entfernen">✕</button>':'')+'</div>';
+}
+function drawOnline(){
+  const ae=document.activeElement;
+  if(ae&&ae.id==='oppinp'&&document.getElementById('presline')){
+    const key=normKey(S.oppInput);
+    document.getElementById('presline').innerHTML=key&&key!==S.me.key?presenceText(key):'';
+    document.getElementById('connline').innerHTML=connText();
+    return;
+  }
+  const inv=Object.keys(S.invites).filter(g=>{const d=S.games[g];return !d||d.status==='invited';});
+  const ids=Object.keys(S.index).sort((a,b)=>((S.games[b]&&S.games[b].ts)||S.index[b].ts||0)-((S.games[a]&&S.games[a].ts)||S.index[a].ts||0));
+  const key=normKey(S.oppInput);
+  view.innerHTML='<section class="hero" style="padding-top:4px"><span class="lbl">Online spielen</span><h1>Freund herausfordern</h1><p class="small" id="connline">'+connText()+'</p></section>'+
+  (inv.length?'<section class="card invite"><h2>Herausforderungen an dich</h2>'+inv.map(g=>{const i=S.invites[g];return '<div class="inv"><div><b>'+esc(i.from)+'</b> will spielen<div class="small muted">'+esc(buildVariant(i.rules||[]).name)+'</div></div><div class="row"><button class="btn sm" data-act="decline" data-gid="'+g+'" type="button">Ablehnen</button><button class="btn sm pri" data-act="accept" data-gid="'+g+'" type="button">Annehmen</button></div></div>';}).join('')+'</section>':'')+
+  '<section class="card"><div class="field"><span class="lbl">Name deines Freundes</span><input type="text" id="oppinp" class="wide" maxlength="24" autocomplete="off" placeholder="genau wie er/sie sich genannt hat" value="'+esc(S.oppInput)+'"></div>'+
+  '<div id="presline" class="small">'+(key&&key!==S.me.key?presenceText(key):'')+'</div>'+
+  (S.challengeErr?'<p class="small" style="color:var(--danger)">'+esc(S.challengeErr)+'</p>':'')+
+  '<h3>Regeln</h3>'+ruleToggles('onlineRules')+
+  '<button class="btn pri" data-act="challenge" type="button" style="align-self:flex-start">Herausfordern</button>'+
+  '<p class="small muted">Dein Name hier: <b>'+esc(S.me.name)+'</b>. Den gibt dein Freund ein, um dich herauszufordern.</p></section>'+
+  '<section class="card"><h2>Deine Partien</h2>'+(ids.length?ids.map(gameRow).join(''):'<p class="muted small">Noch keine Online-Partien.</p>')+'</section>'+
+  '<div class="bar"><button class="btn" data-act="go" data-v="home" type="button">Zum Start</button></div>';
+}
+function connText(){
+  return {online:'<span class="pres on">● Verbunden</span>',verbinde:'<span class="pres">○ Verbinde …</span>',fehler:'<span class="pres" style="color:var(--danger)">Keine Verbindung zum Spielserver. Prüf dein Internet.</span>',aus:'<span class="pres">○ Verbinde …</span>'}[S.conn];
+}
+function drawSettings(){
+  view.innerHTML='<section class="hero" style="padding-top:4px"><span class="lbl">Einstellungen</span><h1>'+esc(S.me.name)+'</h1><p class="small">'+connText()+'</p></section>'+
+  '<section class="card"><h3>Dein Name</h3><p class="small muted">Unter diesem Namen fordern dich Freunde heraus. Laufende Online-Partien bleiben beim alten Namen.</p><button class="btn sm" data-act="rename" type="button" style="align-self:flex-start">Name ändern</button></section>'+
+  '<section class="card"><h3>Alle Regeln</h3><ul class="rulelist">'+RULES.map(r=>'<li><b>'+esc(r.name)+'</b>: '+esc(r.desc)+'</li>').join('')+'</ul><p class="small muted">Neue Regeln kommen nach und nach dazu.</p></section>'+
+  '<section class="card"><h3>So funktioniert online spielen</h3><ul class="rulelist"><li>Jeder wählt einen Namen. Kein Konto, keine E-Mail.</li><li>Du gibst den Namen deines Freundes ein, wählst die Regeln und forderst heraus.</li><li>Er sieht die Herausforderung unter „Online spielen“, auch wenn er gerade nicht online war.</li><li>Die Partien laufen über einen öffentlichen Server. Spielt hier nichts Geheimes.</li></ul></section>'+
+  '<div class="bar"><button class="btn" data-act="go" data-v="home" type="button">Zum Start</button></div>';
+}
+const VAL={P:1,N:3,B:3,R:5,Q:9};
+function pval(v,t){const T=v.types[t];if(!T||T.royal)return 0;if(T.pawn)return 1;return VAL[t]!=null?VAL[t]:3;}
+function material(v,board,c){let s=0;for(const p of board)if(p&&p.c===c)s+=pval(v,p.t);return s;}
+function playerBar(v,G,c,mode,me,o){
+  const caps=(G.caps&&G.caps[c])||[];
+  const diff=material(v,G.board,c)-material(v,G.board,other(c));
+  const name=mode==='online'?(c===me?'Du':(o?o.name:'')):cname(c);
+  const glyphs=caps.slice().sort((a,b)=>pval(v,b)-pval(v,a)).map(t=>v.types[t]?v.types[t].glyph:'').join('');
+  return '<div class="pbar'+(G.turn===c&&!G.result?' turnon':'')+'"><span class="dot '+c+'"></span><b>'+esc(name)+'</b>'+
+    '<span class="caps"><span class="pc '+other(c)+'">'+glyphs+'</span></span>'+(diff>0?'<span class="adv">+'+diff+'</span>':'')+'</div>';
+}
+function replayBar(G,R){
+  if(!G.snaps||G.snaps.length<2)return '';
+  const N=G.snaps.length-1;
+  const label=R==null?'Aktuelle Stellung (Zug '+N+')':(R===0?'Startstellung':'Zug '+R+' von '+N);
+  return '<div class="rbar'+(R!=null?' on':'')+'">'+
+    '<button class="btn sm arrow" data-act="rp-prev" type="button" aria-label="Einen Zug zurück ansehen"'+(R===0?' disabled':'')+'>◀</button>'+
+    '<span class="small rlabel">'+label+'</span>'+
+    '<button class="btn sm arrow" data-act="rp-next" type="button" aria-label="Einen Zug vor ansehen"'+(R==null?' disabled':'')+'>▶</button>'+
+    (R!=null?'<button class="btn sm pri" data-act="rp-live" type="button">Zur aktuellen Stellung</button>':'')+'</div>';
+}
+function replayStep(dir){
+  const ctx=gameCtx();if(!ctx||!ctx.G.snaps)return;
+  const N=ctx.G.snaps.length-1;if(N<1)return;
+  let R=S.replay;
+  if(dir<0)R=R==null?N-1:Math.max(0,R-1);
+  else if(dir>0){if(R==null)return;R=R+1;if(R>=N)R=null;}
+  else R=null;
+  S.replay=R;S.replayKey=S.gid;S.sel=null;render();
+}
+function drawGame(){
+  const ctx=gameCtx();
+  if(!ctx){view.innerHTML='<p class="muted">Partie wird geladen …</p><button class="btn" data-act="go" data-v="online" type="button">Zurück</button>';return;}
+  const {v,G,mode,me,d}=ctx;
+  const flip=mode==='online'?me==='b':S.flip;
+  const pickPhase=hiddenOn(v)&&!G.picked;
+  const active=mode==='local'||d.status==='active';
+  let pickColor=null;
+  if(pickPhase&&active){if(mode==='local')pickColor=G.picks.w===null?'w':'b';else if(me&&G.picks[me]===null)pickColor=me;}
+  const myTurn=active&&(mode==='local'||(me&&me===G.turn));
+  let targets=null,check=null;
+  const legal=(!G.result&&!pickPhase&&myTurn)?legalMoves(v,G,G.turn):[];
+  if(S.sel!=null){targets=new Map();const sr=mode==='online'||S.reveal;for(const m of legal)if(m.from===S.sel&&(!m.reveal||sr))targets.set(m.to,m.cap!=null?'cap':'mv');}
+  if(!G.result&&v.rules.win==='mate'&&!pickPhase&&inCheck(v,G.board,G.turn))check=royals(v,G.board,G.turn).filter(i=>attacked(v,G.board,i,other(G.turn)));
+  const viewer=mode==='online'?me:(S.reveal?G.turn:null);
+  const o=mode==='online'?oppOf(d):null;
+  let banner='';
+  if(mode==='online'&&d.status==='invited')banner='<div class="banner">Warte, bis '+esc(o.name)+' die Herausforderung annimmt. Sie/er findet sie unter „Online spielen“.</div>';
+  else if(mode==='online'&&d.status==='declined')banner='<div class="banner chk">'+esc(o.name)+' hat abgelehnt.</div>';
+  else if(mode==='online'&&d.status==='canceled')banner='<div class="banner">Diese Herausforderung wurde zurückgezogen.</div>';
+  else if(G.result)banner='<div class="banner win">'+(G.result.winner?(mode==='online'?(G.result.winner===me?'Du gewinnst':esc(o.name)+' gewinnt'):cname(G.result.winner)+' gewinnt')+' · '+esc(G.result.why):'Unentschieden · '+esc(G.result.why))+'</div>';
+  else if(pickPhase){
+    if(mode==='local')banner='<div class="banner">'+cname(pickColor)+': Tippe heimlich auf den Bauern, der deine versteckte Dame wird.</div>';
+    else banner=pickColor?'<div class="banner">Tippe heimlich auf den Bauern, der deine versteckte Dame wird.</div>':'<div class="banner">Warte, bis '+esc(o.name)+' die Dame versteckt hat.</div>';
+  }
+  else if(check&&check.length)banner='<div class="banner chk">Schach!</div>';
+  else if(v.rules.dice&&G.dice&&myTurn&&legal.length===0)banner='<div class="banner">Mit diesem Wurf ist kein Zug möglich. Tippe auf „Zug beenden“.</div>';
+  const needRoll=v.rules.dice&&!G.result&&!pickPhase&&active&&!G.dice;
+  let turnTxt;
+  if(G.result||(mode==='online'&&d.status!=='active'))turnTxt=mode==='online'&&d.status==='invited'?'Herausforderung gesendet':'Partie beendet';
+  else if(mode==='online')turnTxt=pickPhase?'Damen verstecken':(myTurn?(needRoll?'Du würfelst':'Du bist dran'):esc(o.name)+(needRoll?' würfelt':' ist dran'));
+  else turnTxt=cname(G.turn)+(needRoll?' würfelt':' am Zug');
+  let who='';
+  if(mode==='online'){const p=S.presence[o.key];who='<p class="small muted">Du spielst '+cname(me)+' gegen <b>'+esc(o.name)+'</b> '+(p&&p.online?'<span class="pres on">● online</span>':'<span class="pres">○ offline</span>')+'</p>';}
+  const snaps=G.snaps||null,NS=snaps?snaps.length-1:0;
+  if(S.replay!=null&&(!snaps||S.replay>=NS||S.replayKey!==S.gid))S.replay=null;
+  const R=S.replay;let RG=null;
+  if(R!=null){const sn=snaps[R];RG={board:snapBoard(sn.b),last:sn.l?{from:sn.l[0],to:sn.l[1]}:null};}
+  let controls;
+  if(mode==='local'){
+    controls='<div class="row"><button class="btn sm" data-act="undo" type="button"'+(S.local.undo&&S.local.undo.length?'':' disabled')+'>Rückgängig</button>'+
+      '<button class="btn sm" data-act="flip" type="button">Brett drehen</button>'+
+      (hiddenOn(v)&&G.picked&&!G.result?'<button class="btn sm hold" data-hold="1" type="button">'+(S.reveal?'Dame sichtbar':'Meine Dame zeigen (halten)')+'</button>':'')+
+      '<button class="btn sm danger" data-act="restart" type="button">Neu starten</button></div>';
+  } else {
+    controls='<div class="row">'+
+      (d.status==='invited'?'<button class="btn sm danger" data-act="cancel" data-gid="'+d.gid+'" type="button">Herausforderung zurückziehen</button>':'')+
+      (d.status==='active'&&!G.result?'<button class="btn sm danger" data-act="resign-ask" type="button">Aufgeben</button>':'')+
+      ((G.result||d.status==='over')&&!d.next?'<button class="btn sm pri" data-act="rematch" data-gid="'+d.gid+'" type="button">Revanche</button>':'')+
+      (d.next&&S.games[d.next]?'<button class="btn sm pri" data-act="open" data-gid="'+d.next+'" type="button">Zur Revanche</button>':'')+
+    '</div>';
+  }
+  view.innerHTML='<section class="boardbox">'+
+    '<div class="status"><div class="turn"><span class="dot '+G.turn+'"></span>'+turnTxt+'</div><span class="small muted">'+esc(v.name)+'</span></div>'+
+    who+banner+(pickPhase?'':diceHTML(v,G,myTurn,mode==='online'?(o?o.name:''):cname(G.turn)))+playerBar(v,G,flip?'w':'b',mode,me,o)+
+    (RG?boardHTML(v,RG,{flip,viewer:null}):boardHTML(v,G,{flip,targets,sel:S.sel,viewer,pickColor,check}))+
+    playerBar(v,G,flip?'b':'w',mode,me,o)+replayBar(G,R)+controls+'</section>'+
+    '<section class="card"><h3>Züge</h3>'+histHTML(G)+'</section>'+
+    '<section class="card"><h3>Sonderregeln dieser Partie</h3>'+activeRulesHTML(v)+'</section>'+
+    '<div class="bar"><button class="btn" data-act="go" data-v="'+(mode==='online'?'online':'home')+'" type="button">'+(mode==='online'?'Alle Partien':'Zum Start')+'</button></div>';
+  const h=document.getElementById('hist');if(h)h.scrollTop=h.scrollHeight;
+  if(mode==='local'&&pickPhase&&!S.pickReady&&overlay.hidden){
+    showOverlay('<h2>'+cname(pickColor)+' versteckt die Dame</h2><p>'+cname(other(pickColor))+', bitte wegschauen. '+cname(pickColor)+' tippt danach auf einen eigenen Bauern.</p><button class="btn pri" data-act="pick-ready" type="button">'+cname(pickColor)+' ist bereit</button>');
+  }
+}
+function draw(){
+  const focusId=document.activeElement&&document.activeElement.id;
+  const caret=focusId&&document.activeElement.selectionStart;
+  if(!S.me)drawName();
+  else if(S.view==='local-setup')drawLocalSetup();
+  else if(S.view==='online')drawOnline();
+  else if(S.view==='settings')drawSettings();
+  else if(S.view==='game')drawGame();
+  else drawHome();
+  drawDrawer();
+  if(focusId){const el=document.getElementById(focusId);if(el){el.focus();try{el.setSelectionRange(caret,caret);}catch(e){}}}
+}
+
+/* ================= Name ================= */
+let ownerProbe=null;
+function saveName(force){
+  const inp=document.getElementById('nameinp');const name=(inp?inp.value:S.nameDraft).trim().replace(/\s+/g,' ');
+  S.nameDraft=name;
+  const key=normKey(name);
+  if(!key||key.length<2){S.nameErr='Bitte mindestens 2 Zeichen.';return render();}
+  const finish=()=>{
+    const old=S.me;
+    if(old&&old.key!==key){Net.pub(P+'u/'+old.key+'/status',{name:old.name,online:false});Net.stop();S.index={};S.invites={};}
+    S.me={name,key};LS.set('hrs-me',S.me);
+    S.nameErr='';S.nameTaken=false;S.view='home';
+    if(!Net.clients.length){Net.start();subscribeMe();}
+    Net.pub(P+'u/'+key+'/owner',{dev});
+    render();
+  };
+  if(force)return finish();
+  // Prüfen, ob der Name schon auf einem anderen Gerät benutzt wird
+  if(!window.mqtt){return finish();}
+  S.nameErr='Prüfe den Namen …';render();
+  const probe=[];let done=false;
+  const end=taken=>{if(done)return;done=true;for(const c of probe)try{c.end(true);}catch(e){}
+    if(taken){S.nameTaken=true;S.nameErr='„'+name+'“ wird schon auf einem anderen Gerät benutzt.';render();}else finish();};
+  for(const url of BROKERS){
+    try{const c=mqtt.connect(url,{clientId:'hrsp_'+rid(8),connectTimeout:6000,reconnectPeriod:0});probe.push(c);
+      c.on('connect',()=>c.subscribe(P+'u/'+key+'/owner'));
+      c.on('message',(t,b)=>{const s=b.toString();if(!s)return;try{const o=JSON.parse(s);if(o.dev&&o.dev!==dev)end(true);}catch(e){}});
+      c.on('error',()=>{});}catch(e){}
+  }
+  setTimeout(()=>end(false),2500);
+}
+
+/* ================= Events ================= */
+document.addEventListener('click',e=>{
+  const sq=e.target.closest('[data-sq]');if(sq&&view.contains(sq)){onSquare(+sq.dataset.sq);return;}
+  const b=e.target.closest('[data-act]');if(!b)return;
+  const act=b.dataset.act,gid=b.dataset.gid;
+  switch(act){
+    case 'go':hideOverlay();S.view=b.dataset.v;S.sel=null;S.challengeErr='';render();window.scrollTo(0,0);break;
+    case 'name-save':saveName(false);break;
+    case 'name-force':saveName(true);break;
+    case 'name-other':S.nameTaken=false;S.nameErr='';S.nameDraft='';render();break;
+    case 'rename':S.nameDraft=S.me.name;S.me=null;render();break;
+    case 'start-local':startLocal();break;
+    case 'resume':S.gid='local';S.view='game';S.sel=null;render();break;
+    case 'challenge':challenge();break;
+    case 'accept':acceptInvite(gid);break;
+    case 'decline':declineInvite(gid);break;
+    case 'cancel':cancelChallenge(gid);break;
+    case 'open':openGame(gid);break;
+    case 'remove':removeGame(gid);break;
+    case 'rematch':rematch(gid);break;
+    case 'resign-ask':showOverlay('<h2>Aufgeben?</h2><p>Die Partie zählt dann als verloren.</p><div class="row"><button class="btn" data-act="close" type="button">Weiterspielen</button><button class="btn pri" data-act="resign" type="button">Aufgeben</button></div>');break;
+    case 'resign':resign();break;
+    case 'close':hideOverlay();break;
+    case 'undo':if(S.local.undo&&S.local.undo.length){S.local.G=S.local.undo.pop();S.sel=null;saveLocal();render();}break;
+    case 'flip':S.flip=!S.flip;render();break;
+    case 'restart':showOverlay('<h2>Neu starten?</h2><p>Die aktuelle Partie geht verloren.</p><div class="row"><button class="btn" data-act="close" type="button">Weiterspielen</button><button class="btn pri" data-act="restart-confirm" type="button">Neu starten</button></div>');break;
+    case 'restart-confirm':hideOverlay();{const v=S.local.v.ruleIds?buildVariant(S.local.v.ruleIds):S.local.v;S.local={v,G:newGame(v),undo:[]};S.pickReady=false;S.sel=null;saveLocal();render();}break;
+    case 'roll':{const ctx=gameCtx();if(ctx&&!ctx.G.dice){const ng=rollDice(ctx.G);setState(ctx,ng,false);if(legalMoves(ctx.v,ng,ng.turn).length===0)toast('Mit diesem Wurf ist kein Zug möglich.');}break;}
+    case 'endturn':{const ctx=gameCtx();if(ctx&&ctx.G.dice){S.sel=null;setState(ctx,endTurn(ctx.v,ctx.G,ctx.G.dice.every(x=>!x.used)),true);}break;}
+    case 'rp-prev':replayStep(-1);break;
+    case 'rp-next':replayStep(1);break;
+    case 'rp-live':replayStep(0);break;
+    case 'drawer':S.drawer=true;render();break;
+    case 'drawer-close':S.drawer=false;render();break;
+    case 'fr-add':{const inp=document.getElementById('friendinp');addFriend(inp?inp.value:S.friendInput,false);break;}
+    case 'fr-del':removeFriend(b.dataset.key);break;
+    case 'fr-play':{const f=S.friends.list.find(x=>x.key===b.dataset.key);const p=f&&S.presence[f.key];S.oppInput=(p&&p.name)||(f&&f.name)||'';S.drawer=false;S.challengeErr='';S.view='online';if(f){S.presAsked[f.key]=S.presAsked[f.key]||Date.now();}render();window.scrollTo(0,0);break;}
+    case 'pick-ready':S.pickReady=true;hideOverlay();break;
+    case 'promo':{const m=S.pendingPromo;S.pendingPromo=null;const ctx=gameCtx();if(m&&ctx)commit(ctx,m,b.dataset.t);break;}
+  }
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset.rule){const f=t.dataset.field;const cur=S[f].filter(x=>x!==t.dataset.rule);if(t.checked)cur.push(t.dataset.rule);S[f]=cur;LS.set(f==='localRules'?'hrs-rules-local':'hrs-rules-online',cur);render();}
+});
+let presT;
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.id==='oppinp'){S.oppInput=t.value;S.challengeErr='';clearTimeout(presT);presT=setTimeout(()=>{const k=normKey(S.oppInput);if(k&&!S.presAsked[k]){S.presAsked[k]=Date.now();Net.sub(P+'u/'+k+'/status');setTimeout(render,2600);}render();},400);}
+  if(t.id==='nameinp'){S.nameDraft=t.value;if(S.nameErr&&!S.nameTaken){S.nameErr='';}}
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target.id==='nameinp')saveName(false);
+  if(e.key==='Enter'&&e.target.id==='oppinp')challenge();
+  if(e.key==='Escape'&&!overlay.hidden&&!overlay.querySelector('[data-act=pick-ready]'))hideOverlay();
+});
+document.getElementById('drawerbg').addEventListener('click',()=>{S.drawer=false;render();});
+document.addEventListener('input',e=>{if(e.target.id==='friendinp'){S.friendInput=e.target.value;S.friendErr='';}});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target.id==='friendinp')addFriend(e.target.value,false);
+  if(S.view==='game'&&!/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)){if(e.key==='ArrowLeft')replayStep(-1);if(e.key==='ArrowRight')replayStep(1);}
+  if(e.key==='Escape'&&S.drawer){S.drawer=false;render();}
+});
+// Wischen vom rechten Rand öffnet die Freundesliste, nach rechts wischen schließt sie
+let sw=null;
+document.addEventListener('touchstart',e=>{const t=e.touches[0];if(!S.me)return;
+  if(!S.drawer&&t.clientX>window.innerWidth-28)sw={x:t.clientX,y:t.clientY,open:true};
+  else if(S.drawer&&e.target.closest('#drawer'))sw={x:t.clientX,y:t.clientY,open:false};else sw=null;},{passive:true});
+document.addEventListener('touchmove',e=>{if(!sw)return;const t=e.touches[0],dx=t.clientX-sw.x,dy=Math.abs(t.clientY-sw.y);
+  if(dy>60){sw=null;return;}
+  if(sw.open&&dx<-45){S.drawer=true;sw=null;render();}
+  else if(!sw.open&&dx>70){S.drawer=false;sw=null;render();}},{passive:true});
+document.addEventListener('touchend',()=>{sw=null;});
+document.addEventListener('visibilitychange',()=>{if(S.me&&Net.clients.length)Net.pub(P+'u/'+S.me.key+'/status',{name:S.me.name,online:!document.hidden,seen:Date.now()});});
+document.addEventListener('focusout',e=>{if(e.target.id==='oppinp')setTimeout(render,0);});
+document.addEventListener('pointerdown',e=>{if(e.target.closest('[data-hold]')){S.reveal=true;render();}});
+const endHold=()=>{if(S.reveal){S.reveal=false;render();}};
+document.addEventListener('pointerup',endHold);document.addEventListener('pointercancel',endHold);
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(S.view==='game')render();},150);});
+
+/* ================= Start ================= */
+render();
+if(S.me){Net.start();subscribeMe();}
+
+</script>
+</body>
+</html>
