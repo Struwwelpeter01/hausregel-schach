@@ -197,6 +197,43 @@ label.tog input{width:20px;height:20px;margin-top:2px;accent-color:var(--accent)
 .rbar.on{background:var(--surface2);outline:2px solid var(--hl)}
 .rbar .arrow{min-width:52px;justify-content:center;font-size:16px}
 .rlabel{min-width:150px;text-align:center;font-variant-numeric:tabular-nums}
+
+/* Geheimwort */
+:root{--gw-r:#c8372d;--gw-r-soft:#f6d6d2;--gw-b:#2a5fcf;--gw-b-soft:#d5e1fa;--gw-n:#d9ceb4;--gw-n-soft:#efe8d8;--gw-a:#1b1d22;--gw-card:#f4efe3;--gw-card-ink:#2a2620}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--gw-r:#e2574c;--gw-r-soft:#4a2421;--gw-b:#5b8cf0;--gw-b-soft:#1f2f52;--gw-n:#8a7f68;--gw-n-soft:#3a3529;--gw-a:#050608;--gw-card:#e8e0cd;--gw-card-ink:#1f1c17}}
+:root[data-theme="dark"]{--gw-r:#e2574c;--gw-r-soft:#4a2421;--gw-b:#5b8cf0;--gw-b-soft:#1f2f52;--gw-n:#8a7f68;--gw-n-soft:#3a3529;--gw-a:#050608;--gw-card:#e8e0cd;--gw-card-ink:#1f1c17}
+.mi.gwmi{font-family:var(--f-display);font-weight:800;font-size:26px;background:var(--gw-r);color:#fff;background-image:linear-gradient(135deg,var(--gw-r) 50%,var(--gw-b) 50%)}
+.gwhead{display:flex;flex-direction:column;gap:8px;padding-top:4px}
+.gwscore{display:flex;gap:8px}
+.gwpill{font-family:var(--f-display);font-weight:800;font-size:16px;padding:4px 12px;border-radius:999px;color:#fff;opacity:.55}
+.gwpill.gw-r{background:var(--gw-r)} .gwpill.gw-b{background:var(--gw-b)}
+.gwpill.on{opacity:1;box-shadow:0 0 0 3px var(--bg),0 0 0 5px currentColor}
+.gwpill.gw-r.on{color:#fff;box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--gw-r)} .gwpill.gw-b.on{box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--gw-b)}
+.banner.gwturn.gw-r{border-color:var(--gw-r);background:var(--gw-r-soft)} .banner.gwturn.gw-b{border-color:var(--gw-b);background:var(--gw-b-soft)}
+.banner.win.gw-r{background:var(--gw-r);border-color:var(--gw-r);color:#fff} .banner.win.gw-b{background:var(--gw-b);border-color:var(--gw-b);color:#fff}
+.gwclue{font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.06em}
+.gwboard{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;width:100%}
+.gwc{position:relative;font:inherit;font-weight:700;font-size:clamp(10.5px,2.9vw,15px);line-height:1.15;min-height:clamp(52px,14vw,78px);padding:4px 3px;border-radius:8px;border:1px solid rgba(0,0,0,.18);background:var(--gw-card);color:var(--gw-card-ink);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-width:0;box-shadow:0 2px 0 rgba(0,0,0,.18)}
+.gwc span{hyphens:auto;-webkit-hyphens:auto;overflow-wrap:anywhere;max-width:100%}
+.gwc i{font-style:normal;font-size:9px;font-weight:700;color:var(--accent);margin-top:2px}
+.gwc.conf{outline:3px solid var(--accent);outline-offset:1px}
+.gwc.spy.k-r{background:var(--gw-r-soft);box-shadow:inset 0 0 0 3px var(--gw-r)} .gwc.spy.k-b{background:var(--gw-b-soft);box-shadow:inset 0 0 0 3px var(--gw-b)}
+.gwc.spy.k-n{background:var(--gw-n-soft)} .gwc.spy.k-a{background:#3a3d44;color:#fff;box-shadow:inset 0 0 0 3px #000}
+.gwc.spy.k-r,.gwc.spy.k-b,.gwc.spy.k-n{color:var(--ink)}
+.gwc.rev{cursor:default;color:#fff;box-shadow:none;border-color:transparent}
+.gwc.rev span{opacity:.75;text-decoration:line-through;text-decoration-thickness:1px}
+.gwc.rev.k-r{background:var(--gw-r)} .gwc.rev.k-b{background:var(--gw-b)} .gwc.rev.k-n{background:var(--gw-n);color:var(--gw-card-ink)} .gwc.rev.k-a{background:var(--gw-a)}
+.gwc:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.gwteams{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gwteam{border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0;border:2px solid}
+.gwteam.gw-r{border-color:var(--gw-r);background:var(--gw-r-soft)} .gwteam.gw-b{border-color:var(--gw-b);background:var(--gw-b-soft)}
+.gwteam h3{font-size:18px} .gwteam.gw-r h3{color:var(--gw-r)} .gwteam.gw-b h3{color:var(--gw-b)}
+.gwclueform{display:flex;gap:8px;flex-wrap:wrap}
+.gwclueform input{flex:1 1 140px;min-width:0;font-family:var(--f-mono);text-transform:uppercase}
+.gwguessrow{justify-content:space-between}
+.gwlog{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px;font-size:14px;max-height:220px;overflow:auto}
+.gwlog li.gw-r::marker{color:var(--gw-r)} .gwlog li.gw-b::marker{color:var(--gw-b)}
+.gwinv summary{cursor:pointer;font-weight:700;padding:6px 0}
 .dicebar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .dice{display:flex;gap:8px}
 .die{width:52px;height:52px;border-radius:10px;background:var(--surface);border:2px solid var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;gap:2px}
@@ -586,10 +623,12 @@ function onMsg(topic,payload){
     if(kind==='status'){S.presence[key]=data;render();return;}
     if(kind==='owner'){S.owner[key]=data||null;return;}
     if(key!==me)return;
+    if(kind==='cninv'){const c=parts[3];if(!data)delete GW.inv[c];else GW.inv[c]=data;render();return;}
     if(kind==='friends'){if(data&&data.list&&data.ts>(S.friends.ts||0)){S.friends=data;LS.set('hrs-friends',data);watchFriends();render();}return;}
     if(kind==='inbox'){const gid=parts[3];if(!data)delete S.invites[gid];else{S.invites[gid]=data;watchGame(gid);Net.sub(P+'u/'+normKey(data.fromKey)+'/status');}render();return;}
     if(kind==='games'){const gid=parts[3];if(!data){delete S.index[gid];}else{S.index[gid]=data;watchGame(gid);}render();return;}
   }
+  if(parts[0]==='cn'&&parts[1]==='r'){gwOnMsg(parts,data);return;}
   if(parts[0]==='g'){
     const gid=parts[1];
     if(parts[2]==='pick'){if(!data)return;(S.picks[gid]=S.picks[gid]||{})[parts[3]]=data.i;render();return;}
@@ -610,7 +649,8 @@ function onMsg(topic,payload){
 }
 function subscribeMe(){
   const k=S.me.key;
-  Net.sub(P+'u/'+k+'/inbox/+');Net.sub(P+'u/'+k+'/games/+');Net.sub(P+'u/'+k+'/owner');Net.sub(P+'u/'+k+'/friends');
+  Net.sub(P+'u/'+k+'/inbox/+');Net.sub(P+'u/'+k+'/games/+');Net.sub(P+'u/'+k+'/owner');Net.sub(P+'u/'+k+'/friends');Net.sub(P+'u/'+k+'/cninv/+');
+  for(const c of GW.myRooms)gwWatch(c);
   watchFriends();
 }
 /* ---- Freunde ---- */
@@ -854,10 +894,11 @@ function myTurnCount(){
 function drawHome(){
   const n=myTurnCount();
   const local=S.local&&S.local.G&&!S.local.G.result;
-  view.innerHTML='<section class="hero"><p class="hand">Hallo '+esc(S.me.name)+'</p><h1>Schach mit euren eigenen Regeln</h1></section>'+
+  view.innerHTML='<section class="hero"><p class="hand">Hallo '+esc(S.me.name)+'</p><h1>Spiele mit euren eigenen Regeln</h1></section>'+
   '<nav class="menu">'+
     '<button class="mbtn" data-act="go" data-v="local-setup" type="button"><span class="mi">♟</span><span><b>Am Handy spielen</b><span class="small muted">Zu zweit an einem Gerät</span></span></button>'+
     '<button class="mbtn" data-act="go" data-v="online" type="button"><span class="mi">♞</span><span><b>Online spielen</b><span class="small muted">Freund per Name herausfordern</span></span>'+(n?'<span class="badge">'+n+'</span>':'')+'</button>'+
+    '<button class="mbtn" data-act="go" data-v="gw-home" type="button"><span class="mi gwmi">W</span><span><b>Geheimwort</b><span class="small muted">Wort-Ratespiel in Teams</span></span>'+(gwInvCount()?'<span class="badge">'+gwInvCount()+'</span>':'')+'</button>'+
     '<button class="mbtn" data-act="go" data-v="settings" type="button"><span class="mi">♜</span><span><b>Einstellungen</b><span class="small muted">Name, Regeln, Verbindung</span></span></button>'+
   '</nav>'+
   (local?'<section class="card"><div class="row" style="justify-content:space-between"><div style="min-width:0"><span class="lbl">Laufende Partie am Handy</span><h3>'+esc(S.local.v.name)+'</h3></div><button class="btn pri sm" data-act="resume" type="button">Weiterspielen</button></div></section>':'');
@@ -1024,9 +1065,270 @@ function draw(){
   else if(S.view==='online')drawOnline();
   else if(S.view==='settings')drawSettings();
   else if(S.view==='game')drawGame();
+  else if(S.view==='gw-home')drawGwHome();
+  else if(S.view==='gw-room')drawGwRoom();
+  else if(S.view==='gw-local')drawGwLocal();
   else drawHome();
   drawDrawer();
   if(focusId){const el=document.getElementById(focusId);if(el){el.focus();try{el.setSelectionRange(caret,caret);}catch(e){}}}
+}
+
+/* ================= Geheimwort (Wort-Agentenspiel) ================= */
+const GW_WORDS=(`Abenteuer Adler Affe Akte Alarm Alpen Ampel Anker Antenne Apfel Arena Arm Arzt Atlas Auge Auto Bach Bahn Ball Band Bank Bar Bär Batterie Bauer Baum Becken Beere Berg Bett Biene Bier Birne Blatt Blitz Block Blume Boden Bogen Bohne Boot Börse Botschaft Box Brand Brett Brief Brille Brücke Brunnen Buch Burg Bus Butter Chef Chip Club Code Dach Dame Decke Diamant Dieb Drache Draht Drossel Dusche Echo Ei Eimer Eis Elefant Engel Ente Erde Eule Fabrik Fackel Fahne Falke Fall Fallschirm Farbe Faser Feder Fee Feld Fenster Ferse Feuer Figur Film Finger Fisch Flasche Fleck Fliege Flügel Flut Form Fuchs Funk Fuß Gabel Gang Gans Garten Gast Geist Geld Gericht Gift Gipfel Gitarre Glas Glocke Gold Golf Gott Grab Gras Griff Grippe Gurke Gürtel Hafen Hahn Hai Hals Hammer Hand Harfe Hase Haut Heft Held Helm Hemd Herz Hexe Himmel Hof Höhle Holz Honig Horn Hose Hotel Hund Hut Igel Insel Jacke Jäger Joker Kabel Käfer Kaffee Käfig Kaiser Kakao Kamel Kamera Kamm Kanal Kanone Kapitän Karte Kater Katze Kegel Keller Kerze Kette Kiefer Kino Kirche Kiste Kiwi Klavier Klee Kleid Knopf Koch Koffer Komet Kompass König Kopf Korb Korken Kraft Kran Kranz Krebs Kreide Kreis Kreuz Krone Kugel Kuh Kunst Kurs Lager Lampe Land Laser Laster Laus Leder Leiter Licht Linie Löwe Luft Mais Mantel Mark Markt Maske Maus Meer Messer Mine Mond Motor Mühle Mund Muschel Musik Nacht Nadel Nagel Napf Nase Nebel Nest Netz Note Nuss Oase Ofen Ohr Oper Orange Orgel Paket Palme Panzer Papier Park Pass Pfeffer Pfeife Pferd Pflaster Pilot Pilz Pinsel Pirat Pistole Plan Planet Platte Polizei Post Presse Prinz Probe Puls Punkt Puppe Pyramide Quelle Rad Radar Rakete Rasen Ratte Raupe Raum Ring Ritter Rock Rolle Rose Rost Rücken Ruder Saft Säge Salz Sand Satellit Schach Schal Schale Schatten Schatz Schild Schiff Schirm Schlange Schloss Schlüssel Schnee Schraube Schuh Schule Schwamm Schwan See Seife Seil Sekt Sense Sessel Sirene Socke Sonne Spiegel Spinne Spion Spitze Stab Stadt Stall Stamm Star Staub Stein Stern Stich Stiefel Stift Strand Strom Stuhl Sturm Tafel Tag Tank Tanz Tasche Taube Taucher Teich Teller Tempel Theater Tiger Tinte Tisch Tor Torte Turm Uhr Ufer Vampir Vase Virus Vogel Vulkan Waage Wache Wal Wald Wand Wanze Wasser Watt Welle Welt Wespe Wetter Wind Wolf Wolke Wurm Wurst Wüste Zahn Zange Zaun Zebra Zelle Zelt Zeug Ziege Zirkus Zoll Zug Zwerg`).split(/\s+/).filter(Boolean);
+const TEAM={r:'Rot',b:'Blau'};
+const tOther=t=>t==='r'?'b':'r';
+function gwShuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function gwNewBoard(prevStart){
+  const start=prevStart?tOther(prevStart):(Math.random()<.5?'r':'b');
+  const words=gwShuffle(GW_WORDS).slice(0,25);
+  const key=gwShuffle([].concat(Array(start==='r'?9:8).fill('r'),Array(start==='b'?9:8).fill('b'),Array(7).fill('n'),['a']));
+  return {words,key,revealed:Array(25).fill(false),turn:start,start,phase:'clue',clue:null,left:0,guessed:0,log:[],winner:null,why:''};
+}
+function gwRemaining(g,t){let n=0;g.key.forEach((k,i)=>{if(k===t&&!g.revealed[i])n++;});return n;}
+function gwEndTurn(g){g=clone(g);g.turn=tOther(g.turn);g.phase='clue';g.clue=null;g.left=0;g.guessed=0;return g;}
+function gwGiveClue(g,word,num){g=clone(g);g.clue={w:word,n:num};g.phase='guess';g.left=num>0?num+1:0;g.guessed=0;g.log=g.log.concat([{t:g.turn,clue:word,n:num}]);return g;}
+function gwReveal(g,i,who){
+  g=clone(g);if(g.revealed[i]||g.winner)return g;
+  g.revealed[i]=true;const k=g.key[i],t=g.turn;
+  g.log=g.log.concat([{t,w:g.words[i],k,who:who||''}]);
+  if(k==='a'){g.winner=tOther(t);g.why=TEAM[t]+' hat den Attentäter aufgedeckt';return g;}
+  if(gwRemaining(g,'r')===0){g.winner='r';g.why='Alle roten Agenten gefunden';return g;}
+  if(gwRemaining(g,'b')===0){g.winner='b';g.why='Alle blauen Agenten gefunden';return g;}
+  if(k===t){g.guessed++;if(g.left>0){g.left--;if(g.left===0)return gwEndTurn(g);}return g;}
+  return gwEndTurn(g);
+}
+
+/* ---- Zustand ---- */
+const GW={rooms:{},players:{},inv:{},cur:null,myRooms:LS.get('hrs-gwrooms',[]),joinCode:'',err:'',confirm:null,
+  local:LS.get('hrs-gwlocal',null),hold:false,clueW:'',clueN:'1',pendingJoin:null,joinT:null};
+function gwRoomCode(){const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let k=0;k<4;k++)s+=a[Math.floor(Math.random()*a.length)];return s;}
+function gwWatch(code){Net.sub(P+'cn/r/'+code);Net.sub(P+'cn/r/'+code+'/p/+');}
+function gwSaveRooms(){LS.set('hrs-gwrooms',GW.myRooms.slice(0,8));}
+function gwPlayers(code){const ps=GW.players[code]||{};return Object.keys(ps).map(k=>Object.assign({key:k},ps[k]));}
+function gwMe(code){return (GW.players[code]||{})[S.me.key]||null;}
+function gwSpyOf(code,t){return gwPlayers(code).find(p=>p.team===t&&p.role==='spy')||null;}
+function gwOpsOf(code,t){return gwPlayers(code).filter(p=>p.team===t&&p.role!=='spy');}
+function gwPubRoom(d){d=clone(d);d.rev=(d.rev||0)+1;d.ts=Date.now();GW.rooms[d.code]=d;Net.pub(P+'cn/r/'+d.code,d);render();}
+function gwPubMe(code,patch){const cur=gwMe(code)||{name:S.me.name,team:null,role:'op'};const p=Object.assign({},cur,patch,{name:S.me.name,ts:Date.now()});(GW.players[code]=GW.players[code]||{})[S.me.key]=p;Net.pub(P+'cn/r/'+code+'/p/'+S.me.key,p);render();}
+function gwOnMsg(parts,data){
+  // parts: ['cn','r',code] oder ['cn','r',code,'p',key]
+  const code=parts[2];if(!code)return;
+  if(parts[3]==='p'){const key=parts[4];GW.players[code]=GW.players[code]||{};if(data)GW.players[code][key]=data;else delete GW.players[code][key];render();return;}
+  if(!data)return;
+  const old=GW.rooms[code];if(old&&old.rev>=data.rev)return;
+  GW.rooms[code]=data;
+  if(old&&old.g&&data.g&&data.g.log.length!==old.g.log.length)GW.confirm=null;
+  if(GW.pendingJoin===code){GW.pendingJoin=null;clearTimeout(GW.joinT);gwAutoJoin(code);}
+  render();
+}
+function gwAutoJoin(code){
+  // kurz warten, bis die Spielerliste des Raums angekommen ist
+  setTimeout(()=>gwAutoJoinNow(code),900);
+}
+function gwAutoJoinNow(code){
+  if(gwMe(code))return;
+  const ps=gwPlayers(code),nr=ps.filter(p=>p.team==='r').length,nb=ps.filter(p=>p.team==='b').length;
+  const team=nr<=nb?'r':'b';
+  gwPubMe(code,{team,role:gwSpyOf(code,team)?'op':'spy'});
+}
+function gwCreate(){
+  if(S.conn!=='online'){GW.err='Keine Verbindung. Prüf dein Internet und versuch es gleich noch einmal.';return render();}
+  const code=gwRoomCode();
+  gwWatch(code);
+  gwPubRoom({code,rev:0,host:S.me.key,status:'lobby',g:null});
+  gwPubMe(code,{team:'r',role:'spy'});
+  gwOpen(code);
+}
+function gwJoin(code){
+  code=String(code||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(code.length!==4){GW.err='Der Raum-Code hat 4 Zeichen.';return render();}
+  GW.err='';gwWatch(code);
+  Net.pub(P+'u/'+S.me.key+'/cninv/'+code,null);delete GW.inv[code];
+  if(GW.rooms[code])gwAutoJoin(code);
+  else{GW.pendingJoin=code;clearTimeout(GW.joinT);GW.joinT=setTimeout(()=>{if(GW.pendingJoin===code&&!GW.rooms[code]){GW.pendingJoin=null;GW.err='Kein Raum mit dem Code '+code+' gefunden.';S.view='gw-home';render();}},4000);}
+  gwOpen(code);
+}
+function gwOpen(code){
+  GW.cur=code;GW.confirm=null;S.view='gw-room';
+  GW.myRooms=[code].concat(GW.myRooms.filter(c=>c!==code));gwSaveRooms();
+  render();window.scrollTo(0,0);
+}
+function gwLeave(code){
+  Net.pub(P+'cn/r/'+code+'/p/'+S.me.key,null);if(GW.players[code])delete GW.players[code][S.me.key];
+  GW.myRooms=GW.myRooms.filter(c=>c!==code);gwSaveRooms();GW.cur=null;S.view='gw-home';hideOverlay();render();
+}
+function gwStart(code){
+  const d=GW.rooms[code];if(!d)return;
+  if(!gwSpyOf(code,'r')||!gwSpyOf(code,'b')){toast('Jedes Team braucht einen Geheimdienstchef.');return;}
+  const nd=clone(d);nd.status='play';nd.g=gwNewBoard(d.g&&d.g.start);gwPubRoom(nd);
+}
+function gwInvite(code,f){Net.pub(P+'u/'+f.key+'/cninv/'+code,{from:S.me.name,code,ts:Date.now()});toast(f.name+' ist eingeladen.');}
+function gwLink(code){return /^https?:/.test(location.protocol)?location.origin+location.pathname+'#gw-'+code:'';}
+
+/* ---- Rechte ---- */
+function gwCanClue(code,g){const me=gwMe(code);return !!(me&&!g.winner&&g.phase==='clue'&&me.team===g.turn&&me.role==='spy');}
+function gwCanGuess(code,g){const me=gwMe(code);if(!me||g.winner||g.phase!=='guess'||me.team!==g.turn)return false;return me.role!=='spy'||gwOpsOf(code,me.team).length===0;}
+
+/* ---- Aktionen (online + lokal) ---- */
+function gwCtx(){
+  if(S.view==='gw-local')return GW.local?{local:true,g:GW.local.g}:null;
+  const d=GW.rooms[GW.cur];return d&&d.g?{local:false,g:d.g,d}:null;
+}
+function gwSetG(ctx,g){
+  if(ctx.local){GW.local={g};LS.set('hrs-gwlocal',GW.local);render();}
+  else{const nd=clone(ctx.d);nd.g=g;gwPubRoom(nd);}
+}
+function gwTap(i){
+  const ctx=gwCtx();if(!ctx)return;const g=ctx.g;
+  if(g.winner||g.revealed[i])return;
+  const allowed=ctx.local?g.phase==='guess':gwCanGuess(GW.cur,g);
+  if(!allowed){if(g.phase==='clue')toast('Erst gibt der Geheimdienstchef einen Hinweis.');return;}
+  if(GW.confirm!==i){GW.confirm=i;render();return;}
+  GW.confirm=null;
+  const ng=gwReveal(g,i,ctx.local?'':S.me.name);
+  const k=g.key[i];
+  if(k==='a')toast('Attentäter! Das Spiel ist vorbei.');
+  else if(!ng.winner&&k!==g.turn)toast(k==='n'?'Unbeteiligter Passant. '+TEAM[ng.turn]+' ist dran.':'Agent von '+TEAM[k]+'! '+TEAM[ng.turn]+' ist dran.');
+  gwSetG(ctx,ng);
+}
+function gwSubmitClue(){
+  const ctx=gwCtx();if(!ctx)return;const g=ctx.g;
+  const w=(GW.clueW||'').trim(),n=parseInt(GW.clueN,10);
+  if(!ctx.local&&!w){toast('Gib ein Hinweis-Wort ein.');return;}
+  if(/\s/.test(w)){toast('Der Hinweis darf nur ein Wort sein.');return;}
+  const lw=w.toLowerCase();
+  if(w&&g.words.some((x,i)=>!g.revealed[i]&&x.toLowerCase()===lw)){toast('Das Wort liegt auf dem Brett. Nimm ein anderes.');return;}
+  GW.clueW='';GW.clueN='1';
+  gwSetG(ctx,gwGiveClue(g,w||'(gesagt)',isNaN(n)?0:n));
+}
+
+/* ---- Ansichten ---- */
+function gwInvCount(){return Object.keys(GW.inv).length;}
+function drawGwHome(){
+  const inv=Object.keys(GW.inv);
+  const localOn=GW.local&&GW.local.g&&!GW.local.g.winner;
+  view.innerHTML='<section class="hero" style="padding-top:4px"><span class="lbl">Zweites Spiel</span><h1>Geheimwort</h1><p class="muted">Zwei Teams, 25 Wörter. Der Geheimdienstchef gibt Ein-Wort-Hinweise, sein Team rät die richtigen Agenten. Wer den Attentäter erwischt, verliert sofort.</p><p class="small" id="connline">'+connText()+'</p></section>'+
+  (inv.length?'<section class="card invite"><h2>Einladungen</h2>'+inv.map(c=>'<div class="inv"><div><b>'+esc(GW.inv[c].from)+'</b> lädt dich ein<div class="small muted">Raum '+esc(c)+'</div></div><div class="row"><button class="btn sm" data-act="gw-decline" data-code="'+esc(c)+'" type="button">Ablehnen</button><button class="btn sm pri" data-act="gw-join" data-code="'+esc(c)+'" type="button">Beitreten</button></div></div>').join('')+'</section>':'')+
+  '<section class="card"><h2>Online mit Freunden</h2><p class="small muted">Erstell einen Raum und lade Freunde ein, oder tritt mit einem Raum-Code bei. Ab 4 Leuten macht es am meisten Spaß, es geht aber auch zu zweit oder zu dritt.</p>'+
+    '<button class="btn pri" data-act="gw-create" type="button" style="align-self:flex-start">Raum erstellen</button>'+
+    '<div class="row"><input type="text" id="gwcode" maxlength="4" autocomplete="off" placeholder="CODE" value="'+esc(GW.joinCode)+'" style="width:110px;text-transform:uppercase;font-family:var(--f-mono);letter-spacing:.2em"><button class="btn" data-act="gw-join-input" type="button">Beitreten</button></div>'+
+    (GW.err?'<p class="small" style="color:var(--danger)">'+esc(GW.err)+'</p>':'')+
+    (GW.myRooms.length?'<div class="row"><span class="lbl">Deine Räume</span>'+GW.myRooms.map(c=>'<button class="btn sm ghost" data-act="gw-join" data-code="'+esc(c)+'" type="button" style="font-family:var(--f-mono)">'+esc(c)+'</button>').join('')+'</div>':'')+
+  '</section>'+
+  '<section class="card"><h2>An einem Gerät</h2><p class="small muted">Ein Handy liegt in der Mitte. Die Geheimdienstchefs schauen sich die geheime Karte an, indem sie den Knopf gedrückt halten.</p><div class="row"><button class="btn" data-act="gw-local-new" type="button">Neues Spiel</button>'+(localOn?'<button class="btn pri" data-act="gw-local-resume" type="button">Weiterspielen</button>':'')+'</div></section>'+
+  '<section class="card"><h3>So geht’s</h3><ul class="rulelist">'+
+    '<li>Jedes Team hat einen <b>Geheimdienstchef</b>. Nur er sieht, welche Wörter zu welchem Team gehören.</li>'+
+    '<li>Er gibt <b>ein Wort und eine Zahl</b>, z. B. „Tier 2“: Zwei Wörter auf dem Brett passen zu „Tier“.</li>'+
+    '<li>Sein Team tippt Wörter an, höchstens Zahl + 1. Ein eigener Agent: weiter raten. Passant oder gegnerischer Agent: Der Zug ist vorbei.</li>'+
+    '<li>Wer zuerst alle eigenen Agenten findet, gewinnt. Wer den <b>Attentäter</b> aufdeckt, verliert sofort.</li>'+
+    '<li>Hinweis 0 heißt: beliebig viele Versuche.</li></ul></section>'+
+  '<div class="bar"><button class="btn" data-act="go" data-v="home" type="button">Zum Start</button></div>';
+}
+function gwBoardHTML(g,spyView){
+  return '<div class="gwboard">'+g.words.map((w,i)=>{
+    const rev=g.revealed[i],k=g.key[i];
+    const cls=['gwc'];
+    if(rev)cls.push('rev','k-'+k);else if(spyView)cls.push('spy','k-'+k);
+    if(GW.confirm===i&&!rev)cls.push('conf');
+    return '<button class="'+cls.join(' ')+'" data-gw="'+i+'" type="button" lang="de"><span>'+esc(w)+'</span>'+(GW.confirm===i&&!rev?'<i>nochmal tippen</i>':'')+'</button>';
+  }).join('')+'</div>';
+}
+function gwStatusHTML(g,meTeam){
+  const rr=gwRemaining(g,'r'),rb=gwRemaining(g,'b');
+  let line;
+  if(g.winner)line='<div class="banner win gw-'+g.winner+'">'+TEAM[g.winner]+' gewinnt · '+esc(g.why)+'</div>';
+  else if(g.phase==='clue')line='<div class="banner gwturn gw-'+g.turn+'">'+TEAM[g.turn]+': Geheimdienstchef überlegt sich einen Hinweis …</div>';
+  else line='<div class="banner gwturn gw-'+g.turn+'">'+TEAM[g.turn]+' rät · Hinweis: <b class="gwclue">'+esc(g.clue.w)+' '+(g.clue.n>0?g.clue.n:'∞')+'</b>'+(g.left>0?' · noch '+g.left+(g.left===1?' Versuch':' Versuche'):'')+'</div>';
+  return '<div class="gwscore"><span class="gwpill gw-r'+(g.turn==='r'&&!g.winner?' on':'')+'">Rot '+rr+'</span><span class="gwpill gw-b'+(g.turn==='b'&&!g.winner?' on':'')+'">Blau '+rb+'</span></div>'+line;
+}
+function gwClueForm(local){
+  return '<div class="gwclueform"><input type="text" id="gwclue" maxlength="24" autocomplete="off" placeholder="'+(local?'Hinweis (optional)':'Ein Wort')+'" value="'+esc(GW.clueW)+'">'+
+    '<select id="gwnum" aria-label="Anzahl">'+[1,2,3,4,5,6,7,8,9,0].map(n=>'<option value="'+n+'"'+(String(n)===GW.clueN?' selected':'')+'>'+(n===0?'∞':n)+'</option>').join('')+'</select>'+
+    '<button class="btn pri" data-act="gw-clue" type="button">Hinweis geben</button></div>';
+}
+function gwLogHTML(g){
+  if(!g.log.length)return '<p class="small muted">Noch nichts passiert.</p>';
+  return '<ol class="gwlog">'+g.log.slice().reverse().map(e=>e.clue!=null?
+    '<li class="gw-'+e.t+'"><b>'+TEAM[e.t]+'</b>: Hinweis „'+esc(e.clue)+'“ '+(e.n>0?e.n:'∞')+'</li>':
+    '<li class="gw-'+e.t+'">'+(e.who?esc(e.who):TEAM[e.t])+' tippt <b>'+esc(e.w)+'</b> → '+({r:'roter Agent',b:'blauer Agent',n:'Passant',a:'Attentäter!'}[e.k])+'</li>').join('')+'</ol>';
+}
+function drawGwRoom(){
+  const code=GW.cur,d=GW.rooms[code];
+  const ae=document.activeElement;
+  if(ae&&ae.id==='gwclue'&&document.getElementById('gwclue'))return; // nicht beim Tippen neu zeichnen
+  if(!d){view.innerHTML='<section class="hero"><span class="lbl">Raum '+esc(code)+'</span><h1>Raum wird geladen …</h1></section><div class="bar"><button class="btn" data-act="go" data-v="gw-home" type="button">Zurück</button></div>';return;}
+  const me=gwMe(code)||{},ps=gwPlayers(code);
+  const teamBox=t=>{const spy=gwSpyOf(code,t),ops=gwOpsOf(code,t);
+    return '<div class="gwteam gw-'+t+'"><h3>'+TEAM[t]+'</h3>'+
+      '<div class="small"><span class="lbl">Geheimdienstchef</span><div>'+(spy?esc(spy.name)+(spy.key===S.me.key?' (du)':''):'<span class="muted">frei</span>')+'</div></div>'+
+      '<div class="small"><span class="lbl">Agenten</span><div>'+(ops.length?ops.map(p=>esc(p.name)+(p.key===S.me.key?' (du)':'')).join(', '):'<span class="muted">noch keiner</span>')+'</div></div>'+
+      '<div class="row"><button class="btn sm'+(me.team===t&&me.role!=='spy'?' pri':'')+'" data-act="gw-role" data-team="'+t+'" data-role="op" type="button">Agent</button>'+
+      '<button class="btn sm'+(me.team===t&&me.role==='spy'?' pri':'')+'" data-act="gw-role" data-team="'+t+'" data-role="spy" type="button">Chef</button></div></div>';};
+  const teams='<div class="gwteams">'+teamBox('r')+teamBox('b')+'</div>';
+  const unassigned=ps.filter(p=>!p.team);
+  const share='<div class="row"><span class="lbl">Raum-Code</span><span class="code" style="font-size:22px">'+esc(code)+'</span><button class="btn sm" data-act="gw-copy" type="button">'+(gwLink(code)?'Link kopieren':'Code kopieren')+'</button></div>';
+  const friends=S.friends.list.length?'<details class="gwinv"><summary>Freunde einladen</summary>'+S.friends.list.map(f=>{const st=friendState(f.key);const inRoom=ps.some(p=>p.key===f.key);
+    return '<div class="fr'+(st.on?' on':'')+'"><span class="frdot"></span><div class="frtxt"><b>'+esc(f.name)+'</b><span class="small muted">'+(inRoom?'ist im Raum':esc(st.txt))+'</span></div>'+(inRoom?'':'<button class="btn sm" data-act="gw-invite" data-key="'+esc(f.key)+'" type="button">Einladen</button>')+'</div>';}).join('')+'</details>':'';
+  if(d.status!=='play'||!d.g){
+    view.innerHTML='<section class="hero" style="padding-top:4px"><span class="lbl">Geheimwort · Raum '+esc(code)+'</span><h1>Teams wählen</h1><p class="small" id="connline">'+connText()+'</p></section>'+
+      '<section class="card">'+share+friends+'</section>'+
+      '<section class="card"><p class="small muted">Tipp bei einem Team auf „Agent“ oder „Chef“. Jedes Team braucht genau einen Chef. Hat ein Team keine Agenten, rät der Chef selbst.</p>'+teams+
+      (unassigned.length?'<p class="small muted">Ohne Team: '+unassigned.map(p=>esc(p.name)).join(', ')+'</p>':'')+
+      '<button class="btn pri" data-act="gw-start" type="button" style="align-self:flex-start"'+(gwSpyOf(code,'r')&&gwSpyOf(code,'b')?'':' disabled')+'>Spiel starten</button></section>'+
+      '<div class="bar"><button class="btn ghost" data-act="gw-leave-ask" type="button">Raum verlassen</button><button class="btn" data-act="go" data-v="gw-home" type="button">Zurück</button></div>';
+    return;
+  }
+  const g=d.g,spyView=me.role==='spy'||!!g.winner;
+  let action='';
+  if(gwCanClue(code,g))action='<section class="card gwaction"><h3>Du bist Chef von '+TEAM[me.team]+'. Gib einen Hinweis:</h3>'+gwClueForm(false)+'</section>';
+  else if(gwCanGuess(code,g))action='<div class="row gwguessrow"><span class="small">Tippe ein Wort zweimal an, um es aufzudecken.</span>'+(g.guessed>0?'<button class="btn sm" data-act="gw-endturn" type="button">Raten beenden</button>':'')+'</div>';
+  else if(!g.winner&&!me.team)action='<p class="small muted">Du schaust zu. Wähl unten ein Team, um mitzuspielen.</p>';
+  view.innerHTML='<section class="gwhead"><div class="row" style="justify-content:space-between"><span class="lbl">Geheimwort · Raum '+esc(code)+'</span><span class="small muted">'+(me.team?'Du: '+TEAM[me.team]+' · '+(me.role==='spy'?'Chef':'Agent'):'Zuschauer')+'</span></div>'+gwStatusHTML(g,me.team)+'</section>'+
+    action+gwBoardHTML(g,spyView)+
+    (g.winner?'<div class="row"><button class="btn pri" data-act="gw-start" type="button">Neue Runde</button><button class="btn" data-act="gw-lobby" type="button">Teams neu wählen</button></div>':'')+
+    '<section class="card"><h3>Verlauf</h3>'+gwLogHTML(g)+'</section>'+
+    '<section class="card"><h3>Teams</h3>'+teams+share+friends+'</section>'+
+    '<div class="bar"><button class="btn ghost" data-act="gw-leave-ask" type="button">Raum verlassen</button><button class="btn" data-act="go" data-v="gw-home" type="button">Zurück</button></div>';
+}
+function drawGwLocal(){
+  const ae=document.activeElement;
+  if(ae&&ae.id==='gwclue'&&document.getElementById('gwclue'))return;
+  if(!GW.local){S.view='gw-home';return drawGwHome();}
+  const g=GW.local.g;
+  let action='';
+  if(!g.winner){
+    if(g.phase==='clue')action='<section class="card gwaction"><h3>Chef von '+TEAM[g.turn]+': Karte ansehen und Hinweis sagen</h3><p class="small muted">Halte den Knopf gedrückt, damit nur du die Karte siehst. Den Hinweis kannst du laut sagen oder hier eintippen.</p>'+gwClueForm(true)+'</section>';
+    else action='<div class="row gwguessrow"><span class="small">Team '+TEAM[g.turn]+': Wort zweimal antippen.</span><button class="btn sm" data-act="gw-endturn" type="button">Raten beenden</button></div>';
+  }
+  view.innerHTML='<section class="gwhead"><span class="lbl">Geheimwort · an einem Gerät</span>'+gwStatusHTML(g,null)+'</section>'+action+
+    gwBoardHTML(g,GW.hold||!!g.winner)+
+    '<div class="row">'+(!g.winner?'<button class="btn hold gwhold" data-gwhold="1" type="button">'+(GW.hold?'Karte sichtbar':'Geheime Karte zeigen (halten)')+'</button>':'')+
+    '<button class="btn'+(g.winner?' pri':' ghost danger')+'" data-act="'+(g.winner?'gw-local-new':'gw-local-new-ask')+'" type="button">Neues Spiel</button></div>'+
+    '<section class="card"><h3>Verlauf</h3>'+gwLogHTML(g)+'</section>'+
+    '<div class="bar"><button class="btn" data-act="go" data-v="gw-home" type="button">Zurück</button></div>';
+}
+function gwAct(act,b){
+  switch(act){
+    case 'gw-create':gwCreate();return true;
+    case 'gw-join':gwJoin(b.dataset.code);return true;
+    case 'gw-join-input':{const el=document.getElementById('gwcode');gwJoin(el?el.value:GW.joinCode);return true;}
+    case 'gw-decline':Net.pub(P+'u/'+S.me.key+'/cninv/'+b.dataset.code,null);delete GW.inv[b.dataset.code];render();return true;
+    case 'gw-role':{const t=b.dataset.team,role=b.dataset.role;const spy=gwSpyOf(GW.cur,t);
+      if(role==='spy'&&spy&&spy.key!==S.me.key){toast(spy.name+' ist schon Chef von '+TEAM[t]+'.');return true;}
+      gwPubMe(GW.cur,{team:t,role});return true;}
+    case 'gw-start':gwStart(GW.cur);return true;
+    case 'gw-lobby':{const d=GW.rooms[GW.cur];if(d){const nd=clone(d);nd.status='lobby';gwPubRoom(nd);}return true;}
+    case 'gw-invite':{const f=S.friends.list.find(x=>x.key===b.dataset.key);if(f)gwInvite(GW.cur,f);return true;}
+    case 'gw-copy':{const txt=gwLink(GW.cur)||GW.cur;(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>toast(gwLink(GW.cur)?'Link kopiert':'Code kopiert'),()=>toast('Code: '+GW.cur));return true;}
+    case 'gw-leave-ask':showOverlay('<h2>Raum verlassen?</h2><p>Du kannst mit dem Code '+esc(GW.cur)+' jederzeit wieder beitreten.</p><div class="row"><button class="btn" data-act="close" type="button">Bleiben</button><button class="btn pri" data-act="gw-leave" type="button">Verlassen</button></div>');return true;
+    case 'gw-leave':gwLeave(GW.cur);return true;
+    case 'gw-clue':gwSubmitClue();return true;
+    case 'gw-endturn':{const ctx=gwCtx();if(ctx){GW.confirm=null;gwSetG(ctx,gwEndTurn(ctx.g));}return true;}
+    case 'gw-local-new':hideOverlay();GW.local={g:gwNewBoard(GW.local&&GW.local.g&&GW.local.g.start)};GW.confirm=null;GW.hold=false;LS.set('hrs-gwlocal',GW.local);S.view='gw-local';render();window.scrollTo(0,0);return true;
+    case 'gw-local-new-ask':showOverlay('<h2>Neues Spiel?</h2><p>Das laufende Spiel geht verloren.</p><div class="row"><button class="btn" data-act="close" type="button">Weiterspielen</button><button class="btn pri" data-act="gw-local-new" type="button">Neues Spiel</button></div>');return true;
+    case 'gw-local-resume':S.view='gw-local';GW.confirm=null;render();return true;
+  }
+  return false;
 }
 
 /* ================= Name ================= */
@@ -1042,6 +1344,7 @@ function saveName(force){
     S.me={name,key};LS.set('hrs-me',S.me);
     S.nameErr='';S.nameTaken=false;S.view='home';
     if(!Net.clients.length){Net.start();subscribeMe();}
+    setTimeout(gwHashJoin,0);
     Net.pub(P+'u/'+key+'/owner',{dev});
     render();
   };
@@ -1064,10 +1367,12 @@ function saveName(force){
 /* ================= Events ================= */
 document.addEventListener('click',e=>{
   const sq=e.target.closest('[data-sq]');if(sq&&view.contains(sq)){onSquare(+sq.dataset.sq);return;}
+  const gc=e.target.closest('[data-gw]');if(gc&&view.contains(gc)){gwTap(+gc.dataset.gw);return;}
   const b=e.target.closest('[data-act]');if(!b)return;
+  if(gwAct(b.dataset.act,b))return;
   const act=b.dataset.act,gid=b.dataset.gid;
   switch(act){
-    case 'go':hideOverlay();S.view=b.dataset.v;S.sel=null;S.challengeErr='';render();window.scrollTo(0,0);break;
+    case 'go':GW.err='';hideOverlay();S.view=b.dataset.v;S.sel=null;S.challengeErr='';render();window.scrollTo(0,0);break;
     case 'name-save':saveName(false);break;
     case 'name-force':saveName(true);break;
     case 'name-other':S.nameTaken=false;S.nameErr='';S.nameDraft='';render();break;
@@ -1117,6 +1422,16 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&e.target.id==='oppinp')challenge();
   if(e.key==='Escape'&&!overlay.hidden&&!overlay.querySelector('[data-act=pick-ready]'))hideOverlay();
 });
+document.addEventListener('input',e=>{const t=e.target;
+  if(t.id==='gwcode'){GW.joinCode=t.value;GW.err='';}
+  if(t.id==='gwclue')GW.clueW=t.value;});
+document.addEventListener('change',e=>{if(e.target.id==='gwnum')GW.clueN=e.target.value;});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target.id==='gwcode')gwJoin(e.target.value);
+  if(e.key==='Enter'&&e.target.id==='gwclue'){GW.clueW=e.target.value;e.target.blur();gwSubmitClue();}});
+document.addEventListener('pointerdown',e=>{if(e.target.closest('[data-gwhold]')){GW.hold=true;render();}});
+const gwEndHold=()=>{if(GW.hold){GW.hold=false;render();}};
+document.addEventListener('pointerup',gwEndHold);document.addEventListener('pointercancel',gwEndHold);
 document.getElementById('drawerbg').addEventListener('click',()=>{S.drawer=false;render();});
 document.addEventListener('input',e=>{if(e.target.id==='friendinp'){S.friendInput=e.target.value;S.friendErr='';}});
 document.addEventListener('keydown',e=>{
@@ -1144,6 +1459,9 @@ let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>
 /* ================= Start ================= */
 render();
 if(S.me){Net.start();subscribeMe();}
+function gwHashJoin(){const m=/^#gw-([A-Z0-9]{4})$/i.exec(location.hash||'');if(!m||!S.me)return;try{history.replaceState(null,'',location.pathname);}catch(e){}gwJoin(m[1]);}
+gwHashJoin();
+window.addEventListener('hashchange',gwHashJoin);
 
 </script>
 </body>
