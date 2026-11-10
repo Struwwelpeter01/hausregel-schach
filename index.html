@@ -581,11 +581,14 @@ let rq=false;function render(){if(rq)return;rq=true;requestAnimationFrame(()=>{r
 
 /* ================= Netz (öffentliche MQTT-Broker, kein Konto nötig) ================= */
 const P='hausregelschach-cp/v1/';
-const BROKERS=['wss://broker.emqx.io:8084/mqtt','wss://broker.hivemq.com:8884/mqtt'];
+// Mehrere öffentliche Server: Jedes Gerät verbindet sich mit allen und schreibt in alle.
+// Port 443 (Eclipse) kommt auch durch WLANs, die ungewöhnliche Ports wie 8084/8884 sperren.
+const BROKERS=['wss://mqtt.eclipseprojects.io:443/mqtt','wss://broker.emqx.io:8084/mqtt','wss://broker.hivemq.com:8884/mqtt'];
 const Net={clients:[],subs:new Set(),
   start(){
     if(Net.clients.length||!S.me)return;
     if(!window.mqtt){S.conn='fehler';render();return;}
+    S.connStart=Date.now();setTimeout(render,15500);
     const will={topic:P+'u/'+S.me.key+'/status',payload:JSON.stringify({name:S.me.name,online:false}),retain:true,qos:1};
     for(const url of BROKERS){
       let c;try{c=mqtt.connect(url,{clientId:'hrs_'+rid(10),clean:true,reconnectPeriod:4000,connectTimeout:12000,keepalive:30,will});}catch(e){continue;}
@@ -953,6 +956,9 @@ function drawOnline(){
   '<div class="bar"><button class="btn" data-act="go" data-v="home" type="button">Zum Start</button></div>';
 }
 function connText(){
+  const n=Net.clients.filter(c=>c._ok).length;
+  if(S.conn==='verbinde'&&S.connStart&&Date.now()-S.connStart>15000)return '<span class="pres" style="color:var(--danger)">Der Spielserver ist von diesem Netz aus nicht erreichbar. Probier ein anderes WLAN oder mobile Daten.</span>';
+  if(S.conn==='online')return '<span class="pres on">● Verbunden</span> <span class="small muted">('+n+' von '+BROKERS.length+' Servern)</span>';
   return {online:'<span class="pres on">● Verbunden</span>',verbinde:'<span class="pres">○ Verbinde …</span>',fehler:'<span class="pres" style="color:var(--danger)">Keine Verbindung zum Spielserver. Prüf dein Internet.</span>',aus:'<span class="pres">○ Verbinde …</span>'}[S.conn];
 }
 function drawSettings(){
