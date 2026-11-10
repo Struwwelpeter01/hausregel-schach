@@ -592,15 +592,15 @@ const Net={clients:[],subs:new Set(),
     const will={topic:P+'u/'+S.me.key+'/status',payload:JSON.stringify({name:S.me.name,online:false}),retain:true,qos:1};
     for(const url of BROKERS){
       let c;try{c=mqtt.connect(url,{clientId:'hrs_'+rid(10),clean:true,reconnectPeriod:4000,connectTimeout:12000,keepalive:30,will});}catch(e){continue;}
-      c._ok=false;
-      c.on('connect',()=>{c._ok=true;Net.update();
+      c._ok=false;c._url=url;c._err='';
+      c.on('connect',()=>{c._ok=true;c._err='';Net.update();
         for(const t of Net.subs)c.subscribe(t,{qos:1});
         c.publish(P+'u/'+S.me.key+'/status',JSON.stringify({name:S.me.name,online:!document.hidden,seen:Date.now()}),{retain:true,qos:1});
         // eigene Spielstände auf diesem Broker auffrischen
         for(const gid in S.games){const d=S.games[gid];if(d&&isMine(d))c.publish(P+'g/'+gid,JSON.stringify(d),{retain:true,qos:1});}
       });
       c.on('close',()=>{c._ok=false;Net.update();});
-      c.on('error',()=>{});
+      c.on('error',e=>{c._err=(e&&e.message)||'Fehler';});
       c.on('message',(t,b)=>onMsg(t,b.toString()));
       Net.clients.push(c);
     }
@@ -961,9 +961,30 @@ function connText(){
   if(S.conn==='online')return '<span class="pres on">● Verbunden</span> <span class="small muted">('+n+' von '+BROKERS.length+' Servern)</span>';
   return {online:'<span class="pres on">● Verbunden</span>',verbinde:'<span class="pres">○ Verbinde …</span>',fehler:'<span class="pres" style="color:var(--danger)">Keine Verbindung zum Spielserver. Prüf dein Internet.</span>',aus:'<span class="pres">○ Verbinde …</span>'}[S.conn];
 }
+function runConnTest(){
+  const host=u=>u.replace(/^wss:\/\//,'').split('/')[0];
+  const res={};const out=()=>{
+    const lines=[];
+    lines.push('<b>Spiel-Bibliothek:</b> '+(window.mqtt?'geladen':'<span style="color:var(--danger)">nicht geladen</span>'));
+    lines.push('<b>WebSocket im Browser:</b> '+(window.WebSocket?'ja':'<span style="color:var(--danger)">nein</span>'));
+    for(const u of BROKERS){const c=Net.clients.find(x=>x._url===u);const r=res[u]||'läuft …';
+      lines.push('<b>'+esc(host(u))+'</b>: Direkttest '+r+' · App '+(c?(c._ok?'<span class="pres on">verbunden</span>':'nicht verbunden'+(c._err?' ('+esc(c._err)+')':'')):'kein Versuch'));}
+    lines.push('<b>Browser:</b> <span class="muted">'+esc(navigator.userAgent)+'</span>');
+    S.connTest=lines.join('<br>');const el=document.getElementById('conntest');if(el)el.innerHTML=S.connTest;
+  };
+  for(const u of BROKERS){
+    let done=false;const fin=r=>{if(done)return;done=true;res[u]=r;out();try{ws.close();}catch(e){}};
+    let ws;try{ws=new WebSocket(u,'mqtt');ws.onopen=()=>fin('<span class="pres on">offen</span>');ws.onerror=()=>fin('<span style="color:var(--danger)">blockiert</span>');}
+    catch(e){fin('<span style="color:var(--danger)">Fehler: '+esc(e.message)+'</span>');}
+    setTimeout(()=>fin('<span style="color:var(--danger)">keine Antwort</span>'),8000);
+  }
+  out();
+}
 function drawSettings(){
   view.innerHTML='<section class="hero" style="padding-top:4px"><span class="lbl">Einstellungen</span><h1>'+esc(S.me.name)+'</h1><p class="small">'+connText()+'</p></section>'+
   '<section class="card"><h3>Dein Name</h3><p class="small muted">Unter diesem Namen fordern dich Freunde heraus. Laufende Online-Partien bleiben beim alten Namen.</p><button class="btn sm" data-act="rename" type="button" style="align-self:flex-start">Name ändern</button></section>'+
+  '<section class="card"><h3>Verbindungstest</h3><p class="small muted">Wenn „Verbinde …“ hängen bleibt: Test starten und mir das Ergebnis schicken.</p>'+
+    '<button class="btn sm" data-act="conn-test" type="button" style="align-self:flex-start">Test starten</button><div id="conntest" class="small">'+(S.connTest||'')+'</div></section>'+
   '<section class="card"><h3>Alle Regeln</h3><ul class="rulelist">'+RULES.map(r=>'<li><b>'+esc(r.name)+'</b>: '+esc(r.desc)+'</li>').join('')+'</ul><p class="small muted">Neue Regeln kommen nach und nach dazu.</p></section>'+
   '<section class="card"><h3>So funktioniert online spielen</h3><ul class="rulelist"><li>Jeder wählt einen Namen. Kein Konto, keine E-Mail.</li><li>Du gibst den Namen deines Freundes ein, wählst die Regeln und forderst heraus.</li><li>Er sieht die Herausforderung unter „Online spielen“, auch wenn er gerade nicht online war.</li><li>Die Partien laufen über einen öffentlichen Server. Spielt hier nichts Geheimes.</li></ul></section>'+
   '<div class="bar"><button class="btn" data-act="go" data-v="home" type="button">Zum Start</button></div>';
@@ -1378,6 +1399,7 @@ document.addEventListener('click',e=>{
   if(gwAct(b.dataset.act,b))return;
   const act=b.dataset.act,gid=b.dataset.gid;
   switch(act){
+    case 'conn-test':runConnTest();break;
     case 'go':GW.err='';hideOverlay();S.view=b.dataset.v;S.sel=null;S.challengeErr='';render();window.scrollTo(0,0);break;
     case 'name-save':saveName(false);break;
     case 'name-force':saveName(true);break;
